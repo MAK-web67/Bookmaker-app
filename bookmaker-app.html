@@ -891,7 +891,16 @@ function sendQuick(t) { document.getElementById('chat-input').value=t; sendMsg()
 
 async function getReply(userMsg) {
   isTyping = true;
-  document.getElementById('send-btn').disabled = true;
+  const res = await fetch("https://api.anthropic.com/v1/messages", {
+  method:"POST",
+  headers:{
+    "Content-Type":"application/json",
+    "x-api-key":"METS_TA_CLÉ_ICI",
+    "anthropic-version":"2023-06-01"
+  },
+  body:JSON.stringify({ model:"claude-haiku-4-5-20251001", max_tokens:500, system:sys, messages:[{role:"user",content:userMsg}] })
+});
+
   showTyping();
 
   const isPro = config.plan === 'pro';
