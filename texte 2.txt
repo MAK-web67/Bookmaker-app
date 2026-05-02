@@ -1,0 +1,1116 @@
+<!DOCTYPE html>
+
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bookmaker — Plateforme</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+
+:root {
+–bg: #0C0C0A;
+–surface: #141412;
+–card: #1C1A17;
+–border: #272420;
+–gold: #D4A843;
+–gold2: #F0C96A;
+–red: #C94040;
+–green: #3DAA6A;
+–text: #EDE8DF;
+–muted: #6B6560;
+–soft: #9B9590;
+}
+
+body { background:var(–bg); color:var(–text); font-family:‘DM Sans’,sans-serif; min-height:100vh; }
+
+/* SCREENS */
+.screen { display:none; min-height:100vh; flex-direction:column; }
+.screen.active { display:flex; }
+
+/* ============ ONBOARDING ============ */
+#screen-onboard {
+align-items:center; justify-content:center;
+background: radial-gradient(ellipse at 50% 0%, rgba(212,168,67,0.08) 0%, transparent 60%), var(–bg);
+padding:24px;
+}
+
+.ob-card {
+background:var(–card); border:1px solid var(–border);
+border-radius:24px; padding:40px 36px;
+max-width:460px; width:100%;
+animation: fadeUp 0.5s ease both;
+}
+
+.ob-logo {
+font-family:‘Syne’,sans-serif; font-size:1.5rem; font-weight:800;
+color:var(–text); margin-bottom:32px;
+}
+.ob-logo em { color:var(–gold); font-style:normal; }
+
+.ob-step { display:none; }
+.ob-step.active { display:block; }
+
+.ob-title { font-family:‘Syne’,sans-serif; font-size:1.4rem; font-weight:800; letter-spacing:-0.5px; margin-bottom:8px; }
+.ob-sub { font-size:0.88rem; color:var(–soft); margin-bottom:28px; line-height:1.6; }
+
+.ob-field { margin-bottom:16px; }
+.ob-field label { display:block; font-size:0.78rem; color:var(–muted); margin-bottom:6px; font-weight:500; letter-spacing:0.3px; }
+.ob-field input, .ob-field select, .ob-field textarea {
+width:100%; background:var(–surface); border:1px solid var(–border);
+color:var(–text); padding:12px 14px; border-radius:10px;
+font-size:0.9rem; font-family:‘DM Sans’,sans-serif; outline:none;
+transition:border-color 0.2s; resize:none;
+}
+.ob-field input:focus, .ob-field select:focus, .ob-field textarea:focus { border-color:var(–gold); }
+.ob-field textarea { height:80px; }
+
+.ob-grid2 { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+
+.ob-btn {
+width:100%; padding:14px; border-radius:10px; border:none;
+background:var(–gold); color:var(–bg);
+font-size:0.95rem; font-weight:700;
+font-family:‘Syne’,sans-serif; cursor:pointer;
+transition:all 0.2s; margin-top:8px;
+}
+.ob-btn:hover { background:var(–gold2); }
+
+.ob-back {
+background:transparent; border:1px solid var(–border);
+color:var(–soft); margin-top:8px;
+}
+.ob-back:hover { border-color:var(–border); color:var(–text); background:var(–surface); }
+
+.ob-progress { display:flex; gap:6px; margin-bottom:28px; }
+.ob-dot { height:3px; border-radius:3px; flex:1; background:var(–border); transition:background 0.3s; }
+.ob-dot.active { background:var(–gold); }
+
+/* PLAN SELECTOR */
+.plan-cards { display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:20px; }
+
+.plan-opt {
+background:var(–surface); border:2px solid var(–border);
+border-radius:14px; padding:20px 16px; cursor:pointer;
+transition:all 0.2s; position:relative;
+}
+.plan-opt:hover { border-color:rgba(212,168,67,0.4); }
+.plan-opt.selected { border-color:var(–gold); background:rgba(212,168,67,0.05); }
+
+.plan-opt .p-name { font-family:‘Syne’,sans-serif; font-size:1rem; font-weight:800; margin-bottom:4px; }
+.plan-opt .p-price { font-size:1.3rem; font-weight:700; color:var(–gold); }
+.plan-opt .p-price span { font-size:0.75rem; color:var(–muted); font-weight:400; }
+.plan-opt .p-feats { font-size:0.75rem; color:var(–soft); margin-top:8px; line-height:1.5; }
+
+.plan-opt.pro-opt { border-color:rgba(212,168,67,0.3); }
+
+.plan-check {
+position:absolute; top:10px; right:10px;
+width:20px; height:20px; border-radius:50%;
+background:var(–gold); color:var(–bg);
+display:none; align-items:center; justify-content:center;
+font-size:0.7rem; font-weight:800;
+}
+.plan-opt.selected .plan-check { display:flex; }
+
+/* ============ APP ============ */
+#screen-app { flex-direction:column; }
+
+/* TOPBAR */
+.topbar {
+background:var(–surface); border-bottom:1px solid var(–border);
+padding:12px 20px;
+display:flex; align-items:center; justify-content:space-between;
+position:sticky; top:0; z-index:100;
+}
+
+.topbar-left { display:flex; align-items:center; gap:12px; }
+
+.resto-avatar {
+width:36px; height:36px; border-radius:10px;
+display:flex; align-items:center; justify-content:center;
+font-size:1.1rem; font-weight:700;
+font-family:‘Syne’,sans-serif;
+}
+
+.resto-name { font-family:‘Syne’,sans-serif; font-size:0.95rem; font-weight:700; }
+.resto-type { font-size:0.72rem; color:var(–muted); }
+
+.plan-tag {
+padding:3px 10px; border-radius:20px; font-size:0.72rem; font-weight:700;
+font-family:‘Syne’,sans-serif; letter-spacing:0.5px;
+}
+.plan-tag.free { background:rgba(155,149,144,0.15); color:var(–soft); }
+.plan-tag.pro { background:rgba(212,168,67,0.15); color:var(–gold); border:1px solid rgba(212,168,67,0.3); }
+
+.topbar-right { display:flex; align-items:center; gap:10px; }
+
+.lang-btn {
+background:var(–card); border:1px solid var(–border);
+color:var(–muted); padding:5px 12px; border-radius:16px;
+font-size:0.78rem; cursor:pointer; transition:all 0.2s;
+font-family:‘DM Sans’,sans-serif;
+}
+.lang-btn.active { background:var(–gold); color:var(–bg); border-color:var(–gold); font-weight:600; }
+
+.upgrade-btn {
+background:var(–gold); color:var(–bg);
+border:none; padding:7px 14px; border-radius:8px;
+font-size:0.78rem; font-weight:700; cursor:pointer;
+font-family:‘Syne’,sans-serif; transition:all 0.2s;
+display:none;
+}
+.upgrade-btn:hover { background:var(–gold2); }
+
+/* TABS */
+.tabs {
+display:flex; background:var(–surface);
+border-bottom:1px solid var(–border);
+overflow-x:auto; scrollbar-width:none;
+}
+
+.tab {
+padding:13px 18px; font-size:0.82rem; color:var(–muted);
+cursor:pointer; white-space:nowrap;
+border-bottom:2px solid transparent; transition:all 0.2s;
+display:flex; align-items:center; gap:6px;
+}
+.tab.active { color:var(–gold); border-bottom-color:var(–gold); }
+
+.tab .lock-icon { font-size:0.7rem; opacity:0.5; }
+
+/* PANELS */
+.panel { display:none; flex:1; flex-direction:column; }
+.panel.active { display:flex; }
+
+/* LOCK OVERLAY */
+.lock-overlay {
+position:absolute; inset:0; z-index:50;
+background:rgba(12,12,10,0.88); backdrop-filter:blur(4px);
+display:flex; flex-direction:column;
+align-items:center; justify-content:center; text-align:center;
+padding:32px;
+}
+.lock-overlay .lock-icon2 { font-size:2.5rem; margin-bottom:16px; }
+.lock-overlay h3 { font-family:‘Syne’,sans-serif; font-size:1.2rem; font-weight:800; margin-bottom:8px; }
+.lock-overlay p { font-size:0.85rem; color:var(–soft); max-width:260px; line-height:1.6; margin-bottom:20px; }
+.lock-overlay button {
+background:var(–gold); color:var(–bg);
+border:none; padding:12px 24px; border-radius:10px;
+font-size:0.88rem; font-weight:700;
+font-family:‘Syne’,sans-serif; cursor:pointer;
+}
+
+/* CHAT */
+.chat-wrap { display:flex; flex-direction:column; height:calc(100vh - 130px); position:relative; }
+.messages { flex:1; overflow-y:auto; padding:16px; display:flex; flex-direction:column; gap:14px; scrollbar-width:thin; scrollbar-color:var(–border) transparent; }
+
+.msg { display:flex; gap:10px; animation:fadeUp 0.3s ease; }
+.msg.user { flex-direction:row-reverse; }
+
+.av {
+width:34px; height:34px; border-radius:50%; flex-shrink:0;
+display:flex; align-items:center; justify-content:center; font-size:0.85rem;
+}
+.av.ai { font-weight:800; font-family:‘Syne’,sans-serif; color:var(–bg); }
+.av.user { background:var(–card); border:1px solid var(–border); }
+
+.bub {
+max-width:72%; padding:11px 14px; border-radius:14px;
+font-size:0.88rem; line-height:1.6;
+}
+.bub.ai { background:var(–card); border:1px solid var(–border); border-radius:4px 14px 14px 14px; }
+.bub.user { border-radius:14px 4px 14px 14px; font-weight:500; }
+
+.typing-dots { display:flex; gap:4px; padding:3px 0; align-items:center; }
+.typing-dots span {
+width:6px; height:6px; border-radius:50%; animation:bounce 1.2s infinite;
+}
+.typing-dots span:nth-child(2) { animation-delay:0.2s; }
+.typing-dots span:nth-child(3) { animation-delay:0.4s; }
+@keyframes bounce { 0%,60%,100%{transform:translateY(0);opacity:0.4} 30%{transform:translateY(-6px);opacity:1} }
+
+.quick-row { padding:8px 16px; display:flex; gap:8px; overflow-x:auto; scrollbar-width:none; border-top:1px solid var(–border); }
+.q-btn {
+background:var(–card); border:1px solid var(–border);
+color:var(–text); padding:6px 13px; border-radius:20px;
+font-size:0.78rem; cursor:pointer; white-space:nowrap;
+transition:all 0.2s; font-family:‘DM Sans’,sans-serif;
+}
+.q-btn:hover { border-color:var(–gold); color:var(–gold); }
+
+.input-row { padding:10px 14px; display:flex; gap:8px; background:var(–surface); border-top:1px solid var(–border); }
+.input-row input {
+flex:1; background:var(–card); border:1px solid var(–border);
+color:var(–text); padding:11px 14px; border-radius:22px;
+font-size:0.88rem; font-family:‘DM Sans’,sans-serif; outline:none; transition:border-color 0.2s;
+}
+.input-row input:focus { border-color:var(–gold); }
+.input-row input::placeholder { color:var(–muted); }
+
+.send-btn {
+background:var(–gold); border:none; color:var(–bg);
+width:42px; height:42px; border-radius:50%; cursor:pointer;
+font-size:1rem; display:flex; align-items:center; justify-content:center;
+transition:all 0.2s; flex-shrink:0;
+}
+.send-btn:hover { background:var(–gold2); }
+.send-btn:disabled { background:var(–border); cursor:not-allowed; }
+
+/* MENU */
+.menu-wrap { padding:16px; overflow-y:auto; }
+.cat-title { font-family:‘Syne’,sans-serif; font-size:0.95rem; font-weight:700; color:var(–gold); margin:16px 0 10px; display:flex; align-items:center; gap:8px; }
+.menu-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(150px,1fr)); gap:10px; margin-bottom:8px; }
+
+.m-card {
+background:var(–card); border:1px solid var(–border);
+border-radius:12px; padding:14px; cursor:pointer; transition:all 0.2s;
+}
+.m-card:hover { border-color:var(–gold); transform:translateY(-2px); }
+.m-emoji { font-size:1.7rem; margin-bottom:8px; }
+.m-name { font-size:0.85rem; font-weight:600; margin-bottom:3px; }
+.m-price { font-size:0.82rem; color:var(–gold); font-weight:700; }
+.m-desc { font-size:0.72rem; color:var(–muted); margin-top:4px; }
+
+/* ORDER */
+.order-wrap { flex:1; overflow-y:auto; padding:16px; display:flex; flex-direction:column; gap:10px; }
+.o-item {
+background:var(–card); border:1px solid var(–border);
+border-radius:12px; padding:14px;
+display:flex; align-items:center; gap:12px;
+animation:fadeUp 0.3s ease;
+}
+.o-info { flex:1; }
+.o-name { font-size:0.88rem; font-weight:600; }
+.o-price { font-size:0.82rem; color:var(–gold); margin-top:2px; }
+.qty-ctrl { display:flex; align-items:center; gap:8px; }
+.qty-btn {
+background:var(–surface); border:1px solid var(–border);
+color:var(–text); width:26px; height:26px; border-radius:50%;
+cursor:pointer; font-size:1rem; display:flex; align-items:center; justify-content:center;
+transition:all 0.2s; font-family:‘DM Sans’,sans-serif;
+}
+.qty-btn:hover { border-color:var(–gold); color:var(–gold); }
+.qty { font-size:0.88rem; min-width:18px; text-align:center; }
+
+.order-footer {
+background:var(–surface); border-top:1px solid var(–border); padding:16px;
+}
+.total-row { display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; }
+.total-lbl { font-size:0.88rem; color:var(–muted); }
+.total-val { font-family:‘Syne’,sans-serif; font-size:1.3rem; color:var(–gold); font-weight:800; }
+.confirm-btn {
+width:100%; background:var(–red); border:none; color:white;
+padding:14px; border-radius:10px; font-size:0.92rem; font-weight:700;
+font-family:‘Syne’,sans-serif; cursor:pointer; transition:all 0.2s;
+}
+.confirm-btn:hover { background:#d44444; }
+
+.empty-state { text-align:center; padding:48px 24px; color:var(–muted); }
+.empty-state .big { font-size:3rem; margin-bottom:12px; }
+.empty-state p { font-size:0.88rem; }
+
+/* MANAGER */
+.mgr-wrap { padding:16px; overflow-y:auto; position:relative; }
+
+.stats-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:10px; margin-bottom:20px; }
+.stat-card { background:var(–card); border:1px solid var(–border); border-radius:12px; padding:16px; }
+.stat-val { font-family:‘Syne’,sans-serif; font-size:1.6rem; font-weight:800; color:var(–gold); }
+.stat-lbl { font-size:0.75rem; color:var(–muted); margin-top:3px; }
+
+.ai-tip {
+background:linear-gradient(135deg, #161200, #1a1500);
+border:1px solid rgba(212,168,67,0.3); border-radius:12px; padding:16px; margin-bottom:16px;
+}
+.ai-tip-tag { font-size:0.7rem; color:var(–gold); letter-spacing:2px; text-transform:uppercase; font-weight:700; margin-bottom:8px; }
+.ai-tip p { font-size:0.85rem; line-height:1.6; }
+
+.stock-item {
+background:var(–card); border:1px solid var(–border); border-radius:10px;
+padding:12px 14px; display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;
+}
+.stock-name { font-size:0.87rem; }
+.badge { padding:3px 9px; border-radius:20px; font-size:0.7rem; font-weight:700; }
+.badge.ok { background:rgba(61,170,106,0.15); color:var(–green); }
+.badge.low { background:rgba(201,64,64,0.15); color:var(–red); }
+
+/* SETTINGS */
+.settings-wrap { padding:16px; overflow-y:auto; position:relative; }
+.settings-section { margin-bottom:24px; }
+.settings-title { font-family:‘Syne’,sans-serif; font-size:0.8rem; font-weight:700; letter-spacing:2px; text-transform:uppercase; color:var(–muted); margin-bottom:12px; }
+
+.s-field { margin-bottom:12px; }
+.s-field label { display:block; font-size:0.78rem; color:var(–muted); margin-bottom:5px; }
+.s-field input, .s-field select, .s-field textarea {
+width:100%; background:var(–surface); border:1px solid var(–border);
+color:var(–text); padding:11px 13px; border-radius:8px;
+font-size:0.88rem; font-family:‘DM Sans’,sans-serif; outline:none; transition:border-color 0.2s;
+}
+.s-field input:focus, .s-field select:focus { border-color:var(–gold); }
+
+.color-row { display:flex; gap:8px; flex-wrap:wrap; }
+.color-swatch {
+width:32px; height:32px; border-radius:8px; cursor:pointer;
+border:2px solid transparent; transition:all 0.2s;
+}
+.color-swatch.selected { border-color:white; transform:scale(1.1); }
+
+.save-btn {
+background:var(–gold); border:none; color:var(–bg);
+padding:12px 24px; border-radius:8px; font-size:0.88rem; font-weight:700;
+font-family:‘Syne’,sans-serif; cursor:pointer; transition:all 0.2s;
+}
+.save-btn:hover { background:var(–gold2); }
+
+.cart-badge {
+background:var(–red); color:white;
+width:17px; height:17px; border-radius:50%; font-size:0.68rem;
+display:inline-flex; align-items:center; justify-content:center; font-weight:700;
+}
+
+.toast {
+position:fixed; bottom:80px; left:50%; transform:translateX(-50%) translateY(20px);
+background:var(–green); color:white; padding:9px 18px; border-radius:22px;
+font-size:0.82rem; font-weight:500; opacity:0; transition:all 0.3s;
+z-index:999; pointer-events:none;
+}
+.toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+
+/* UPGRADE MODAL */
+.umodal-overlay {
+position:fixed; inset:0; z-index:200;
+background:rgba(0,0,0,0.85); backdrop-filter:blur(8px);
+display:flex; align-items:center; justify-content:center; padding:20px;
+opacity:0; pointer-events:none; transition:opacity 0.3s;
+}
+.umodal-overlay.open { opacity:1; pointer-events:all; }
+
+.umodal {
+background:var(–card); border:1px solid var(–gold);
+border-radius:20px; padding:36px 28px; max-width:420px; width:100%;
+transform:translateY(20px); transition:transform 0.3s;
+position:relative; text-align:center;
+}
+.umodal-overlay.open .umodal { transform:translateY(0); }
+
+.umodal h3 { font-family:‘Syne’,sans-serif; font-size:1.4rem; font-weight:800; margin-bottom:8px; }
+.umodal p { font-size:0.87rem; color:var(–soft); line-height:1.6; margin-bottom:24px; }
+
+.umodal-feats { text-align:left; background:var(–surface); border-radius:12px; padding:16px; margin-bottom:24px; }
+.umodal-feat { display:flex; align-items:center; gap:10px; font-size:0.85rem; padding:6px 0; }
+.umodal-feat .c { color:var(–gold); }
+
+.umodal-price { font-family:‘Syne’,sans-serif; font-size:2rem; font-weight:800; color:var(–gold); margin-bottom:4px; }
+.umodal-price span { font-size:0.9rem; color:var(–muted); font-weight:400; }
+.umodal-note { font-size:0.78rem; color:var(–muted); margin-bottom:20px; }
+
+.umodal-btn {
+width:100%; padding:14px; border-radius:10px; border:none;
+background:var(–gold); color:var(–bg); font-size:0.92rem; font-weight:700;
+font-family:‘Syne’,sans-serif; cursor:pointer; transition:all 0.2s;
+}
+.umodal-btn:hover { background:var(–gold2); }
+
+.umodal-close {
+position:absolute; top:14px; right:16px; background:none; border:none;
+color:var(–muted); font-size:1.3rem; cursor:pointer;
+}
+
+@keyframes fadeUp { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
+
+@media(max-width:400px) {
+.menu-grid { grid-template-columns:repeat(2,1fr); }
+.stats-grid { grid-template-columns:repeat(2,1fr); }
+.plan-cards { grid-template-columns:1fr; }
+}
+</style>
+
+</head>
+<body>
+
+<!-- ============ ONBOARDING ============ -->
+
+<div class="screen active" id="screen-onboard">
+  <div class="ob-card">
+    <div class="ob-logo">Book<em>maker</em></div>
+    <div class="ob-progress">
+      <div class="ob-dot active" id="dot0"></div>
+      <div class="ob-dot" id="dot1"></div>
+      <div class="ob-dot" id="dot2"></div>
+    </div>
+
+```
+<!-- STEP 0 : Infos resto -->
+<div class="ob-step active" id="step0">
+  <div class="ob-title">Votre établissement</div>
+  <div class="ob-sub">Configurons votre Bookmaker en 3 étapes rapides.</div>
+
+  <div class="ob-field">
+    <label>Nom de l'établissement *</label>
+    <input type="text" id="ob-name" placeholder="Ex: Chez Mama Céleste" oninput="updatePreview()">
+  </div>
+  <div class="ob-grid2">
+    <div class="ob-field">
+      <label>Type *</label>
+      <select id="ob-type" onchange="updatePreview()">
+        <option value="maquis">🏚️ Maquis / Gargote</option>
+        <option value="resto">🍽️ Restaurant</option>
+        <option value="truck">🚐 Food Truck</option>
+        <option value="delivery">📦 Livraison</option>
+      </select>
+    </div>
+    <div class="ob-field">
+      <label>Ville *</label>
+      <select id="ob-city">
+        <option>Brazzaville</option>
+        <option>Kinshasa</option>
+        <option>Pointe-Noire</option>
+        <option>Lubumbashi</option>
+        <option>Autre</option>
+      </select>
+    </div>
+  </div>
+  <div class="ob-field">
+    <label>Description courte</label>
+    <textarea id="ob-desc" placeholder="Cuisine traditionnelle congolaise depuis 2018..."></textarea>
+  </div>
+  <button class="ob-btn" onclick="nextStep(1)">Continuer →</button>
+</div>
+
+<!-- STEP 1 : Personnalisation -->
+<div class="ob-step" id="step1">
+  <div class="ob-title">Personnalisation</div>
+  <div class="ob-sub">Choisissez l'identité visuelle de votre Bookmaker.</div>
+
+  <div class="ob-field">
+    <label>Emoji / Logo de votre établissement</label>
+    <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:4px;">
+      <span style="font-size:1.8rem; cursor:pointer;" onclick="selectEmoji(this,'🏚️')">🏚️</span>
+      <span style="font-size:1.8rem; cursor:pointer;" onclick="selectEmoji(this,'🍽️')">🍽️</span>
+      <span style="font-size:1.8rem; cursor:pointer;" onclick="selectEmoji(this,'🚐')">🚐</span>
+      <span style="font-size:1.8rem; cursor:pointer;" onclick="selectEmoji(this,'🌿')">🌿</span>
+      <span style="font-size:1.8rem; cursor:pointer;" onclick="selectEmoji(this,'🔥')">🔥</span>
+      <span style="font-size:1.8rem; cursor:pointer;" onclick="selectEmoji(this,'⭐')">⭐</span>
+      <span style="font-size:1.8rem; cursor:pointer;" onclick="selectEmoji(this,'🥘')">🥘</span>
+      <span style="font-size:1.8rem; cursor:pointer;" onclick="selectEmoji(this,'🍖')">🍖</span>
+    </div>
+  </div>
+
+  <div class="ob-field">
+    <label>Couleur principale</label>
+    <div class="color-row">
+      <div class="color-swatch selected" style="background:#D4A843" onclick="selectColor('#D4A843',this)"></div>
+      <div class="color-swatch" style="background:#C94040" onclick="selectColor('#C94040',this)"></div>
+      <div class="color-swatch" style="background:#3DAA6A" onclick="selectColor('#3DAA6A',this)"></div>
+      <div class="color-swatch" style="background:#4A7CC7" onclick="selectColor('#4A7CC7',this)"></div>
+      <div class="color-swatch" style="background:#9B59B6" onclick="selectColor('#9B59B6',this)"></div>
+      <div class="color-swatch" style="background:#E07B39" onclick="selectColor('#E07B39',this)"></div>
+    </div>
+  </div>
+
+  <div class="ob-field">
+    <label>Langue de l'interface</label>
+    <select id="ob-lang">
+      <option value="fr">Français</option>
+      <option value="en">English</option>
+    </select>
+  </div>
+
+  <button class="ob-btn" onclick="nextStep(2)">Continuer →</button>
+  <button class="ob-btn ob-back" onclick="nextStep(0)">← Retour</button>
+</div>
+
+<!-- STEP 2 : Plan -->
+<div class="ob-step" id="step2">
+  <div class="ob-title">Choisissez votre plan</div>
+  <div class="ob-sub">Commencez gratuitement, évoluez à votre rythme.</div>
+
+  <div class="plan-cards">
+    <div class="plan-opt selected" id="plan-free" onclick="selectPlan('free')">
+      <div class="plan-check">✓</div>
+      <div class="p-name">Gratuit</div>
+      <div class="p-price">0 <span>FCFA/mois</span></div>
+      <div class="p-feats">10 plats · 50 msg/jour · FR seulement</div>
+    </div>
+    <div class="plan-opt pro-opt" id="plan-pro" onclick="selectPlan('pro')">
+      <div class="plan-check">✓</div>
+      <div class="p-name" style="color:var(--gold)">Pro ⭐</div>
+      <div class="p-price">15 000 <span>FCFA/mois</span></div>
+      <div class="p-feats">Illimité · FR+EN · Dashboard · Stock</div>
+    </div>
+  </div>
+
+  <button class="ob-btn" onclick="launchApp()">Lancer mon Bookmaker 🚀</button>
+  <button class="ob-btn ob-back" onclick="nextStep(1)">← Retour</button>
+</div>
+```
+
+  </div>
+</div>
+
+<!-- ============ APP ============ -->
+
+<div class="screen" id="screen-app">
+
+  <!-- TOPBAR -->
+
+  <div class="topbar">
+    <div class="topbar-left">
+      <div class="resto-avatar" id="app-avatar">🍽️</div>
+      <div>
+        <div class="resto-name" id="app-name">Mon Restaurant</div>
+        <div class="resto-type" id="app-type">Restaurant</div>
+      </div>
+      <div class="plan-tag" id="plan-tag">FREE</div>
+    </div>
+    <div class="topbar-right">
+      <button class="lang-btn active" id="btn-fr" onclick="setLang('fr')">FR</button>
+      <button class="lang-btn" id="btn-en" onclick="setLang('en')">EN</button>
+      <button class="upgrade-btn" id="upgrade-btn" onclick="openUpgrade()">⭐ Passer Pro</button>
+    </div>
+  </div>
+
+  <!-- TABS -->
+
+  <div class="tabs" id="tabs">
+    <div class="tab active" onclick="showTab('chat')" id="tab-chat">🤖 <span id="t-chat">Assistant</span></div>
+    <div class="tab" onclick="showTab('menu')" id="tab-menu">🍽️ <span id="t-menu">Menu</span></div>
+    <div class="tab" onclick="showTab('order')" id="tab-order">🛒 <span id="t-order">Commande</span> <span id="cart-badge" class="cart-badge" style="display:none">0</span></div>
+    <div class="tab" onclick="handleLockedTab('manager')" id="tab-mgr">📊 <span id="t-mgr">Gérant</span> <span class="lock-icon" id="lock-mgr">🔒</span></div>
+    <div class="tab" onclick="handleLockedTab('settings')" id="tab-set">⚙️ <span id="t-set">Config</span> <span class="lock-icon" id="lock-set">🔒</span></div>
+  </div>
+
+  <!-- CHAT PANEL -->
+
+  <div class="panel active" id="panel-chat">
+    <div class="chat-wrap">
+      <div class="messages" id="messages"></div>
+      <div class="quick-row" id="quick-row"></div>
+      <div class="input-row">
+        <input type="text" id="chat-input" placeholder="Écrivez un message..." onkeydown="if(event.key==='Enter')sendMsg()">
+        <button class="send-btn" id="send-btn" onclick="sendMsg()">➤</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MENU PANEL -->
+
+  <div class="panel" id="panel-menu">
+    <div class="menu-wrap" id="menu-wrap"></div>
+  </div>
+
+  <!-- ORDER PANEL -->
+
+  <div class="panel" id="panel-order">
+    <div class="order-wrap" id="order-wrap"></div>
+    <div class="order-footer" id="order-footer" style="display:none">
+      <div class="total-row">
+        <span class="total-lbl" id="lbl-total">Total</span>
+        <span class="total-val" id="total-val">0 FCFA</span>
+      </div>
+      <button class="confirm-btn" id="confirm-btn" onclick="confirmOrder()">Confirmer la commande</button>
+    </div>
+  </div>
+
+  <!-- MANAGER PANEL -->
+
+  <div class="panel" id="panel-manager">
+    <div class="mgr-wrap" id="mgr-wrap" style="position:relative"></div>
+  </div>
+
+  <!-- SETTINGS PANEL -->
+
+  <div class="panel" id="panel-settings">
+    <div class="settings-wrap" id="settings-wrap" style="position:relative"></div>
+  </div>
+
+</div>
+
+<!-- UPGRADE MODAL -->
+
+<div class="umodal-overlay" id="umodal">
+  <div class="umodal">
+    <button class="umodal-close" onclick="closeUpgrade()">×</button>
+    <div style="font-size:2rem;margin-bottom:12px">⭐</div>
+    <h3>Passer au Plan Pro</h3>
+    <p>Débloquez toutes les fonctionnalités pour développer votre établissement.</p>
+    <div class="umodal-feats">
+      <div class="umodal-feat"><span class="c">✓</span> Menu illimité + photos de plats</div>
+      <div class="umodal-feat"><span class="c">✓</span> Assistant IA messages illimités</div>
+      <div class="umodal-feat"><span class="c">✓</span> Bilingue Français + Anglais</div>
+      <div class="umodal-feat"><span class="c">✓</span> Tableau de bord gérant complet</div>
+      <div class="umodal-feat"><span class="c">✓</span> Gestion des stocks en temps réel</div>
+      <div class="umodal-feat"><span class="c">✓</span> Personnalisation logo & couleurs</div>
+      <div class="umodal-feat"><span class="c">✓</span> Statistiques & rapports hebdo</div>
+    </div>
+    <div class="umodal-price">15 000 <span>FCFA / mois</span></div>
+    <div class="umodal-note">14 jours d'essai gratuit · Sans engagement</div>
+    <button class="umodal-btn" onclick="activatePro()">Activer le Plan Pro →</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ===== STATE =====
+let config = {
+  name: '', type: 'resto', city: 'Brazzaville', desc: '',
+  emoji: '🍽️', color: '#D4A843', lang: 'fr', plan: 'free'
+};
+let lang = 'fr';
+let cart = [];
+let isTyping = false;
+let obStep = 0;
+
+// ===== TRANSLATIONS =====
+const T = {
+  fr: {
+    tabs: ['Assistant','Menu','Commande','Gérant','Config'],
+    welcome: n => `Bienvenue chez **${n}** ! 👋\nJe suis votre assistant Bookmaker. Je peux vous aider à :\n• Passer une commande\n• Découvrir notre menu\n• Répondre à vos questions\n\nComment puis-je vous aider ?`,
+    quick: ['Voir le menu 🍽️', 'Recommande-moi un plat', 'Plat du jour', 'Spécialités maison'],
+    added: '✓ Ajouté au panier',
+    confirmed: '🎉 Commande confirmée !',
+    empty: 'Votre panier est vide',
+    emptySub: 'Explorez le menu et ajoutez des plats',
+    confirmBtn: 'Confirmer la commande',
+    total: 'Total',
+    placeholder: 'Écrivez un message...',
+    upgradeMsg: items => `✅ Commande confirmée ! ${items} article(s) en préparation.\n⏱️ Temps estimé : 20-30 min. Merci ! 😊`,
+  },
+  en: {
+    tabs: ['Assistant','Menu','Order','Manager','Settings'],
+    welcome: n => `Welcome to **${n}**! 👋\nI'm your Bookmaker assistant. I can help you:\n• Place an order\n• Discover our menu\n• Answer your questions\n\nHow can I help you?`,
+    quick: ['See menu 🍽️', 'Recommend a dish', "Today's special", 'House specialties'],
+    added: '✓ Added to cart',
+    confirmed: '🎉 Order confirmed!',
+    empty: 'Your cart is empty',
+    emptySub: 'Browse the menu and add dishes',
+    confirmBtn: 'Confirm order',
+    total: 'Total',
+    placeholder: 'Write a message...',
+    upgradeMsg: items => `✅ Order confirmed! ${items} item(s) being prepared.\n⏱️ Estimated time: 20-30 min. Thank you! 😊`,
+  }
+};
+
+// ===== MENU DATA =====
+const menuData = [
+  { cat: '🌿 Spécialités Congolaises', catEn: '🌿 Congolese Specialties', items: [
+    { id:1, e:'🥬', fr:'Pondu au Poisson', en:'Cassava Leaves & Fish', p:3500, dfr:'Feuilles de manioc, poisson fumé', den:'Cassava leaves, smoked fish' },
+    { id:2, e:'🍗', fr:'Poulet Moambe', en:'Moambe Chicken', p:5500, dfr:'Poulet en sauce noix de palme', den:'Chicken in palm nut sauce' },
+    { id:3, e:'🐟', fr:'Liboke de Poisson', en:'Fish Liboke', p:6000, dfr:'Poisson grillé en feuille de bananier', den:'Grilled fish in banana leaf' },
+    { id:4, e:'🍲', fr:'Saka Saka', en:'Saka Saka', p:3000, dfr:'Feuilles de manioc pilées', den:'Pounded cassava leaves' },
+  ]},
+  { cat: '🍱 Plats Principaux', catEn: '🍱 Main Dishes', items: [
+    { id:5, e:'🍚', fr:'Riz au Poulet', en:'Chicken Rice', p:4500, dfr:'Riz parfumé, poulet grillé', den:'Fragrant rice, grilled chicken' },
+    { id:6, e:'🥩', fr:'Brochettes de Bœuf', en:'Beef Skewers', p:5000, dfr:'Marinées aux épices locales', den:'Marinated in local spices' },
+    { id:7, e:'🍟', fr:'Alloco & Viande', en:'Plantain & Meat', p:4000, dfr:'Plantain frit, viande sautée', den:'Fried plantain, sautéed meat' },
+  ]},
+  { cat: '🥤 Boissons', catEn: '🥤 Drinks', items: [
+    { id:8, e:'🍹', fr:'Jus de Maracuja', en:'Passion Fruit Juice', p:1200, dfr:'Fraîchement pressé', den:'Freshly squeezed' },
+    { id:9, e:'🌿', fr:'Bissap Glacé', en:'Iced Hibiscus', p:1000, dfr:'Fleur d\'hibiscus', den:'Hibiscus flower drink' },
+    { id:10, e:'🫙', fr:'Eau Minérale', en:'Mineral Water', p:500, dfr:'Fraîche', den:'Cold' },
+  ]},
+  { cat: '🍮 Desserts', catEn: '🍮 Desserts', items: [
+    { id:11, e:'🍌', fr:'Banane Flambée', en:'Flambéed Banana', p:2000, dfr:'Caramel, cannelle', den:'Caramel, cinnamon' },
+    { id:12, e:'🥜', fr:'Beignets au Miel', en:'Honey Fritters', p:1500, dfr:'Beignets maison', den:'Homemade fritters' },
+  ]},
+];
+
+// ===== ONBOARDING =====
+function nextStep(s) {
+  if (s === 1) {
+    const n = document.getElementById('ob-name').value.trim();
+    if (!n) { alert('Veuillez entrer le nom de votre établissement'); return; }
+    config.name = n;
+    config.type = document.getElementById('ob-type').value;
+    config.city = document.getElementById('ob-city').value;
+    config.desc = document.getElementById('ob-desc').value;
+  }
+  if (s === 2) {
+    config.lang = document.getElementById('ob-lang').value;
+  }
+  obStep = s;
+  document.querySelectorAll('.ob-step').forEach((el,i) => el.classList.toggle('active', i===s));
+  document.querySelectorAll('.ob-dot').forEach((el,i) => el.classList.toggle('active', i<=s));
+}
+
+function updatePreview() {}
+
+function selectEmoji(el, em) {
+  document.querySelectorAll('[onclick^="selectEmoji"]').forEach(e => e.style.opacity='0.5');
+  el.style.opacity = '1';
+  config.emoji = em;
+}
+
+function selectColor(c, el) {
+  document.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('selected'));
+  el.classList.add('selected');
+  config.color = c;
+  document.documentElement.style.setProperty('--gold', c);
+}
+
+function selectPlan(p) {
+  config.plan = p;
+  document.getElementById('plan-free').classList.toggle('selected', p==='free');
+  document.getElementById('plan-pro').classList.toggle('selected', p==='pro');
+}
+
+function launchApp() {
+  lang = config.lang;
+  applyConfig();
+  document.getElementById('screen-onboard').classList.remove('active');
+  document.getElementById('screen-app').classList.add('active');
+  initApp();
+}
+
+// ===== APP =====
+function applyConfig() {
+  document.documentElement.style.setProperty('--gold', config.color);
+  document.getElementById('app-avatar').textContent = config.emoji;
+  document.getElementById('app-avatar').style.background = config.color + '22';
+  document.getElementById('app-avatar').style.color = config.color;
+  document.getElementById('app-name').textContent = config.name || 'Mon Restaurant';
+  const types = { maquis:'Maquis / Gargote', resto:'Restaurant', truck:'Food Truck', delivery:'Livraison' };
+  document.getElementById('app-type').textContent = (types[config.type] || 'Restaurant') + ' · ' + config.city;
+
+  const isPro = config.plan === 'pro';
+  const tag = document.getElementById('plan-tag');
+  tag.textContent = isPro ? 'PRO ⭐' : 'FREE';
+  tag.className = 'plan-tag ' + (isPro ? 'pro' : 'free');
+
+  document.getElementById('upgrade-btn').style.display = isPro ? 'none' : 'block';
+
+  // lock tabs
+  const lockMgr = document.getElementById('lock-mgr');
+  const lockSet = document.getElementById('lock-set');
+  if (lockMgr) lockMgr.style.display = isPro ? 'none' : 'inline';
+  if (lockSet) lockSet.style.display = isPro ? 'none' : 'inline';
+
+  // lang buttons
+  if (config.plan !== 'pro') {
+    document.getElementById('btn-en').style.opacity = '0.4';
+    document.getElementById('btn-en').title = 'Disponible en plan Pro';
+  }
+
+  updateTabLabels();
+}
+
+function updateTabLabels() {
+  const tabs = T[lang].tabs;
+  ['t-chat','t-menu','t-order','t-mgr','t-set'].forEach((id,i) => {
+    const el = document.getElementById(id);
+    if(el) el.textContent = tabs[i];
+  });
+  document.getElementById('lbl-total').textContent = T[lang].total;
+  document.getElementById('confirm-btn').textContent = T[lang].confirmBtn;
+  document.getElementById('chat-input').placeholder = T[lang].placeholder;
+}
+
+function initApp() {
+  addMsg('ai', T[lang].welcome(config.name));
+  renderQuick();
+  renderMenu();
+  renderOrder();
+  renderManager();
+  renderSettings();
+}
+
+// ===== LANG =====
+function setLang(l) {
+  if (l === 'en' && config.plan !== 'pro') { openUpgrade(); return; }
+  lang = l;
+  document.getElementById('btn-fr').classList.toggle('active', l==='fr');
+  document.getElementById('btn-en').classList.toggle('active', l==='en');
+  updateTabLabels();
+  renderQuick();
+  renderMenu();
+  renderOrder();
+  renderManager();
+}
+
+// ===== TABS =====
+function showTab(id) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('panel-'+id).classList.add('active');
+  document.getElementById('tab-'+(id==='manager'?'mgr':id==='settings'?'set':id)).classList.add('active');
+}
+
+function handleLockedTab(id) {
+  if (config.plan !== 'pro') { openUpgrade(); return; }
+  showTab(id);
+}
+
+// ===== CHAT =====
+function renderQuick() {
+  const c = document.getElementById('quick-row');
+  c.innerHTML = T[lang].quick.map(q => `<button class="q-btn" onclick="sendQuick('${q}')">${q}</button>`).join('');
+}
+
+function addMsg(role, text) {
+  const msgs = document.getElementById('messages');
+  const div = document.createElement('div');
+  div.className = `msg ${role}`;
+  const html = text.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/\n/g,'<br>').replace(/•/g,'·');
+  const av = role === 'ai'
+    ? `<div class="av ai" style="background:${config.color}22;color:${config.color}">${config.emoji}</div>`
+    : `<div class="av user">👤</div>`;
+  const bub = role === 'ai'
+    ? `<div class="bub ai">${html}</div>`
+    : `<div class="bub user" style="background:${config.color};color:#0C0C0A">${html}</div>`;
+  div.innerHTML = role === 'ai' ? `${av}${bub}` : `${bub}${av}`;
+  msgs.appendChild(div);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+function showTyping() {
+  const msgs = document.getElementById('messages');
+  const d = document.createElement('div');
+  d.className = 'msg ai'; d.id = 'typing';
+  d.innerHTML = `<div class="av ai" style="background:${config.color}22;color:${config.color}">${config.emoji}</div><div class="bub ai"><div class="typing-dots"><span style="background:${config.color}"></span><span style="background:${config.color}"></span><span style="background:${config.color}"></span></div></div>`;
+  msgs.appendChild(d); msgs.scrollTop = msgs.scrollHeight;
+}
+
+function removeTyping() { const el=document.getElementById('typing'); if(el) el.remove(); }
+
+async function sendMsg() {
+  const inp = document.getElementById('chat-input');
+  const text = inp.value.trim();
+  if (!text || isTyping) return;
+  inp.value = '';
+  addMsg('user', text);
+  await getReply(text);
+}
+
+function sendQuick(t) { document.getElementById('chat-input').value=t; sendMsg(); }
+
+async function getReply(userMsg) {
+  isTyping = true;
+  document.getElementById('send-btn').disabled = true;
+  showTyping();
+
+  const isPro = config.plan === 'pro';
+  const types = { maquis:'maquis', resto:'restaurant', truck:'food truck', delivery:'service de livraison' };
+  const menuCtx = menuData.flatMap(c=>c.items).slice(0, isPro ? 999 : 10)
+    .map(i=>`- ${lang==='fr'?i.fr:i.en}: ${i.p.toLocaleString()} FCFA`).join('\n');
+
+  const limitNote = isPro ? '' : '\nIMPORTANT: Tu es en version gratuite — rappelle subtilement au client les avantages du plan Pro si pertinent.';
+
+  const sys = lang === 'fr'
+    ? `Tu es l'assistant IA de "${config.name}", un ${types[config.type]} situé à ${config.city}, Congo. Sois chaleureux, professionnel et concis (max 3 phrases). Menu:\n${menuCtx}\nPour commander, invite le client à utiliser l'onglet Menu.${limitNote}`
+    : `You are the AI assistant of "${config.name}", a ${config.type} located in ${config.city}, Congo. Be warm, professional and concise (max 3 sentences). Menu:\n${menuCtx}\nTo order, invite the customer to use the Menu tab.`;
+
+  try {
+    const res = await fetch("https://api.anthropic.com/v1/messages", {
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({ model:"claude-sonnet-4-20250514", max_tokens:1000, system:sys, messages:[{role:"user",content:userMsg}] })
+    });
+    const data = await res.json();
+    removeTyping();
+    addMsg('ai', data.content?.[0]?.text || (lang==='fr'?'Désolé, une erreur est survenue.':'Sorry, an error occurred.'));
+  } catch {
+    removeTyping();
+    addMsg('ai', lang==='fr'?'Connexion impossible. Veuillez réessayer.':'Connection failed. Please try again.');
+  }
+  isTyping = false;
+  document.getElementById('send-btn').disabled = false;
+}
+
+// ===== MENU =====
+function renderMenu() {
+  const isPro = config.plan === 'pro';
+  const limit = isPro ? 999 : 10;
+  let count = 0;
+  const c = document.getElementById('menu-wrap');
+  let html = '';
+
+  if (!isPro) {
+    html += `<div style="background:rgba(212,168,67,0.08);border:1px solid rgba(212,168,67,0.2);border-radius:10px;padding:10px 14px;margin-bottom:16px;font-size:0.82rem;color:var(--gold)">
+      ⚠️ Plan Gratuit : ${limit} plats maximum. <button onclick="openUpgrade()" style="background:none;border:none;color:var(--gold);text-decoration:underline;cursor:pointer;font-size:0.82rem;font-family:inherit">Passer Pro →</button>
+    </div>`;
+  }
+
+  for (const cat of menuData) {
+    if (count >= limit) break;
+    const catItems = cat.items.filter(() => count++ <= limit);
+    if (!catItems.length) break;
+    const catName = lang === 'fr' ? cat.cat : cat.catEn;
+    html += `<div class="cat-title">${catName}</div><div class="menu-grid">`;
+    html += cat.items.slice(0, Math.max(0, limit - (count - cat.items.length))).map(item =>
+      `<div class="m-card" onclick="addToCart(${item.id})">
+        <div class="m-emoji">${item.e}</div>
+        <div class="m-name">${lang==='fr'?item.fr:item.en}</div>
+        <div class="m-price">${item.p.toLocaleString()} FCFA</div>
+        <div class="m-desc">${lang==='fr'?item.dfr:item.den}</div>
+      </div>`
+    ).join('');
+    html += '</div>';
+  }
+  c.innerHTML = html;
+}
+
+// ===== CART =====
+function addToCart(id) {
+  const item = menuData.flatMap(c=>c.items).find(i=>i.id===id);
+  const ex = cart.find(c=>c.id===id);
+  if (ex) ex.qty++; else cart.push({...item, qty:1});
+  updateBadge();
+  showToast(T[lang].added);
+}
+
+function updateBadge() {
+  const total = cart.reduce((s,i)=>s+i.qty,0);
+  const b = document.getElementById('cart-badge');
+  b.textContent = total;
+  b.style.display = total > 0 ? 'inline-flex' : 'none';
+}
+
+function renderOrder() {
+  const c = document.getElementById('order-wrap');
+  const foot = document.getElementById('order-footer');
+  if (!cart.length) {
+    c.innerHTML = `<div class="empty-state"><div class="big">🛒</div><p>${T[lang].empty}</p><p style="margin-top:6px;font-size:0.78rem;color:var(--muted)">${T[lang].emptySub}</p></div>`;
+    foot.style.display='none'; return;
+  }
+  foot.style.display='block';
+  c.innerHTML = cart.map(item=>`
+    <div class="o-item">
+      <div style="font-size:1.5rem">${item.e}</div>
+      <div class="o-info">
+        <div class="o-name">${lang==='fr'?item.fr:item.en}</div>
+        <div class="o-price">${(item.p*item.qty).toLocaleString()} FCFA</div>
+      </div>
+      <div class="qty-ctrl">
+        <button class="qty-btn" onclick="changeQty(${item.id},-1)">−</button>
+        <span class="qty">${item.qty}</span>
+        <button class="qty-btn" onclick="changeQty(${item.id},1)">+</button>
+      </div>
+    </div>`).join('');
+  const total = cart.reduce((s,i)=>s+i.p*i.qty,0);
+  document.getElementById('total-val').textContent = total.toLocaleString()+' FCFA';
+  document.getElementById('confirm-btn').textContent = T[lang].confirmBtn;
+}
+
+function changeQty(id, d) {
+  const i = cart.findIndex(c=>c.id===id);
+  if(i===-1) return;
+  cart[i].qty += d;
+  if(cart[i].qty<=0) cart.splice(i,1);
+  updateBadge(); renderOrder();
+}
+
+function confirmOrder() {
+  if (!cart.length) return;
+  const count = cart.reduce((s,i)=>s+i.qty,0);
+  cart=[]; updateBadge(); renderOrder();
+  showToast(T[lang].confirmed);
+  addMsg('ai', T[lang].upgradeMsg(count));
+  showTab('chat');
+}
+
+// ===== MANAGER =====
+function renderManager() {
+  const c = document.getElementById('mgr-wrap');
+  const isPro = config.plan === 'pro';
+  const isFr = lang === 'fr';
+  c.innerHTML = `
+    <div class="stats-grid">
+      <div class="stat-card"><div class="stat-val">47</div><div class="stat-lbl">${isFr?'Commandes aujourd\'hui':'Orders today'}</div></div>
+      <div class="stat-card"><div class="stat-val">182K</div><div class="stat-lbl">${isFr?'Revenus FCFA':'Revenue FCFA'}</div></div>
+      <div class="stat-card"><div class="stat-val">4.8⭐</div><div class="stat-lbl">${isFr?'Note moyenne':'Avg. rating'}</div></div>
+      <div class="stat-card"><div class="stat-val">12</div><div class="stat-lbl">${isFr?'Tables occupées':'Tables occupied'}</div></div>
+    </div>
+    <div class="ai-tip">
+      <div class="ai-tip-tag">🤖 ${isFr?'Conseil IA':'AI Tip'}</div>
+      <p>${isFr
+        ? 'Le <strong>Poulet Moambe</strong> est très demandé ce soir (+32%). Pensez à préparer davantage de sauce. Le <strong>Liboke</strong> est le moins commandé — envisagez une promotion.'
+        : '<strong>Moambe Chicken</strong> is in high demand tonight (+32%). Prepare more sauce. <strong>Liboke</strong> is the least ordered — consider a promotion.'
+      }</p>
+    </div>
+    <div style="font-family:\'Syne\',sans-serif;font-size:0.78rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:12px">${isFr?'STOCK EN TEMPS RÉEL':'REAL-TIME STOCK'}</div>
+    ${[
+      { n:isFr?'Feuilles de manioc':'Cassava leaves', s:'ok' },
+      { n:isFr?'Poisson fumé':'Smoked fish', s:'low' },
+      { n:isFr?'Huile de palme':'Palm oil', s:'ok' },
+      { n:isFr?'Riz (50kg)':'Rice (50kg)', s:'low' },
+    ].map(s=>`<div class="stock-item"><span class="stock-name">${s.n}</span><span class="badge ${s.s}">${s.s==='ok'?'✓ OK':(isFr?'⚠ Réapprovisionner':'⚠ Reorder')}</span></div>`).join('')}
+    ${!isPro ? `<div class="lock-overlay"><div class="lock-icon2">🔒</div><h3>${isFr?'Fonctionnalité Pro':'Pro Feature'}</h3><p>${isFr?'Accédez au tableau de bord complet avec le plan Pro.':'Access the full dashboard with the Pro plan.'}</p><button onclick="openUpgrade()">${isFr?'Débloquer Pro ⭐':'Unlock Pro ⭐'}</button></div>` : ''}
+  `;
+}
+
+// ===== SETTINGS =====
+function renderSettings() {
+  const c = document.getElementById('settings-wrap');
+  const isPro = config.plan === 'pro';
+  const isFr = lang === 'fr';
+  c.innerHTML = `
+    <div class="settings-section">
+      <div class="settings-title">${isFr?'Informations':'Information'}</div>
+      <div class="s-field"><label>${isFr?'Nom':'Name'}</label><input type="text" value="${config.name}" id="s-name"></div>
+      <div class="s-field"><label>${isFr?'Description':'Description'}</label><input type="text" value="${config.desc||''}" id="s-desc"></div>
+      <div class="s-field"><label>${isFr?'Ville':'City'}</label><input type="text" value="${config.city}" id="s-city"></div>
+    </div>
+    <div class="settings-section">
+      <div class="settings-title">${isFr?'Apparence':'Appearance'}</div>
+      <div class="s-field"><label>${isFr?'Couleur principale':'Primary color'}</label>
+        <div class="color-row">
+          ${['#D4A843','#C94040','#3DAA6A','#4A7CC7','#9B59B6','#E07B39'].map(c=>
+            `<div class="color-swatch${c===config.color?' selected':''}" style="background:${c}" onclick="selectColor('${c}',this);renderSettings()"></div>`
+          ).join('')}
+        </div>
+      </div>
+    </div>
+    <div class="settings-section">
+      <div class="settings-title">${isFr?'Plan actuel':'Current plan'}</div>
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center">
+        <div>
+          <div style="font-family:\'Syne\',sans-serif;font-weight:700;font-size:0.95rem">${isPro?'Pro ⭐':'Gratuit'}</div>
+          <div style="font-size:0.78rem;color:var(--muted)">${isPro?'15 000 FCFA/mois':'0 FCFA/mois'}</div>
+        </div>
+        ${!isPro?`<button onclick="openUpgrade()" style="background:var(--gold);border:none;color:var(--bg);padding:8px 14px;border-radius:8px;font-size:0.8rem;font-weight:700;font-family:\'Syne\',sans-serif;cursor:pointer">⭐ Passer Pro</button>`:'<span style="color:var(--green);font-size:0.85rem">✓ Actif</span>'}
+      </div>
+    </div>
+    <button class="save-btn" onclick="saveSettings()">${isFr?'Enregistrer':'Save'}</button>
+    ${!isPro?`<div class="lock-overlay"><div class="lock-icon2">🔒</div><h3>${isFr?'Config avancée':'Advanced Settings'}</h3><p>${isFr?'Personnalisez entièrement votre Bookmaker avec le plan Pro.':'Fully customize your Bookmaker with the Pro plan.'}</p><button onclick="openUpgrade()">${isFr?'Débloquer Pro ⭐':'Unlock Pro ⭐'}</button></div>`:''}
+  `;
+}
+
+function saveSettings() {
+  config.name = document.getElementById('s-name')?.value || config.name;
+  config.desc = document.getElementById('s-desc')?.value || config.desc;
+  config.city = document.getElementById('s-city')?.value || config.city;
+  applyConfig();
+  showToast(lang==='fr'?'✓ Sauvegardé !':'✓ Saved!');
+}
+
+// ===== UPGRADE =====
+function openUpgrade() { document.getElementById('umodal').classList.add('open'); }
+function closeUpgrade() { document.getElementById('umodal').classList.remove('open'); }
+
+function activatePro() {
+  config.plan = 'pro';
+  closeUpgrade();
+  applyConfig();
+  renderMenu();
+  renderManager();
+  renderSettings();
+  showToast('🎉 Plan Pro activé !');
+  // unlock EN
+  document.getElementById('btn-en').style.opacity = '1';
+  document.getElementById('btn-en').title = '';
+}
+
+// ===== TOAST =====
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 2500);
+}
+
+document.getElementById('umodal').addEventListener('click', function(e){ if(e.target===this) closeUpgrade(); });
+</script>
+
+</body>
+</html>
