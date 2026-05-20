@@ -1,0 +1,1323 @@
+<!DOCTYPE html>
+
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#0A0A08">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bookmaker — Plateforme</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+
+:root {
+–bg: #0C0C0A;
+–surface: #141412;
+–card: #1C1A17;
+–border: #272420;
+–gold: #D4A843;
+–gold2: #F0C96A;
+–red: #C94040;
+–green: #3DAA6A;
+–text: #EDE8DF;
+–muted: #6B6560;
+–soft: #9B9590;
+}
+
+body { background: #0C0C0A !important; color: #EDE8DF !important; -webkit-text-size-adjust: 100%; background:#0A0A08; color:#EDE8DF; font-family:‘DM Sans’,sans-serif; min-height:100vh; }
+
+/* SCREENS */
+.screen { display:none; min-height:100vh; flex-direction:column; }
+.screen.active { display:flex; }
+
+/* ============ ONBOARDING ============ */
+#screen-onboard {
+align-items:center; justify-content:center;
+background: radial-gradient(ellipse at 50% 0%, rgba(212,168,67,0.08) 0%, transparent 60%), #0A0A08;
+padding:24px;
+}
+
+.ob-card {
+background:#181714; border:1px solid #252320;
+border-radius:24px; padding:40px 36px;
+max-width:460px; width:100%;
+animation: fadeUp 0.5s ease both;
+}
+
+.ob-logo {
+font-family:‘Syne’,sans-serif; font-size:1.5rem; font-weight:800;
+color:#EDE8DF; margin-bottom:32px;
+}
+.ob-logo em { color:#D4A843; font-style:normal; }
+
+.ob-step { display:none; }
+.ob-step.active { display:block; }
+
+.ob-title { font-family:‘Syne’,sans-serif; font-size:1.4rem; font-weight:800; letter-spacing:-0.5px; margin-bottom:8px; }
+.ob-sub { font-size:0.88rem; color:#9B9590; margin-bottom:28px; line-height:1.6; }
+
+.ob-field { margin-bottom:16px; }
+.ob-field label { display:block; font-size:0.78rem; color:#6B6560; margin-bottom:6px; font-weight:500; letter-spacing:0.3px; }
+.ob-field input, .ob-field select, .ob-field textarea {
+width:100%; background:#111110; border:1px solid #252320;
+color:#EDE8DF; padding:12px 14px; border-radius:10px;
+font-size:0.9rem; font-family:‘DM Sans’,sans-serif; outline:none;
+transition:border-color 0.2s; resize:none;
+}
+.ob-field input:focus, .ob-field select:focus, .ob-field textarea:focus { border-color:#D4A843; }
+.ob-field textarea { height:80px; }
+
+.ob-grid2 { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+
+.ob-btn {
+width:100%; padding:14px; border-radius:10px; border:none;
+background:#D4A843; color:#0A0A08;
+font-size:0.95rem; font-weight:700;
+font-family:‘Syne’,sans-serif; cursor:pointer;
+transition:all 0.2s; margin-top:8px;
+}
+.ob-btn:hover { background:var(–gold2); }
+
+.ob-back {
+background:transparent; border:1px solid #252320;
+color:#9B9590; margin-top:8px;
+}
+.ob-back:hover { border-color:#252320; color:#EDE8DF; background:#111110; }
+
+.ob-progress { display:flex; gap:6px; margin-bottom:28px; }
+.ob-dot { height:3px; border-radius:3px; flex:1; background:#252320; transition:background 0.3s; }
+.ob-dot.active { background:#D4A843; }
+
+/* PLAN SELECTOR */
+.plan-cards { display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:20px; }
+
+.plan-opt {
+background:#111110; border:2px solid #252320;
+border-radius:14px; padding:20px 16px; cursor:pointer;
+transition:all 0.2s; position:relative;
+}
+.plan-opt:hover { border-color:rgba(212,168,67,0.4); }
+.plan-opt.selected { border-color:#D4A843; background:rgba(212,168,67,0.05); }
+
+.plan-opt .p-name { font-family:‘Syne’,sans-serif; font-size:1rem; font-weight:800; margin-bottom:4px; }
+.plan-opt .p-price { font-size:1.3rem; font-weight:700; color:#D4A843; }
+.plan-opt .p-price span { font-size:0.75rem; color:#6B6560; font-weight:400; }
+.plan-opt .p-feats { font-size:0.75rem; color:#9B9590; margin-top:8px; line-height:1.5; }
+
+.plan-opt.pro-opt { border-color:rgba(212,168,67,0.3); }
+
+.plan-check {
+position:absolute; top:10px; right:10px;
+width:20px; height:20px; border-radius:50%;
+background:#D4A843; color:#0A0A08;
+display:none; align-items:center; justify-content:center;
+font-size:0.7rem; font-weight:800;
+}
+.plan-opt.selected .plan-check { display:flex; }
+
+/* ============ APP ============ */
+#screen-app { flex-direction:column; }
+
+/* TOPBAR */
+.topbar {
+background:#111110; border-bottom:1px solid #252320;
+padding:12px 20px;
+display:flex; align-items:center; justify-content:space-between;
+position:sticky; top:0; z-index:100;
+}
+
+.topbar-left { display:flex; align-items:center; gap:12px; }
+
+.resto-avatar {
+width:36px; height:36px; border-radius:10px;
+display:flex; align-items:center; justify-content:center;
+font-size:1.1rem; font-weight:700;
+font-family:‘Syne’,sans-serif;
+}
+
+.resto-name { font-family:‘Syne’,sans-serif; font-size:0.95rem; font-weight:700; }
+.resto-type { font-size:0.72rem; color:#6B6560; }
+
+.plan-tag {
+padding:3px 10px; border-radius:20px; font-size:0.72rem; font-weight:700;
+font-family:‘Syne’,sans-serif; letter-spacing:0.5px;
+}
+.plan-tag.free { background:rgba(155,149,144,0.15); color:#9B9590; }
+.plan-tag.pro { background:rgba(212,168,67,0.15); color:#D4A843; border:1px solid rgba(212,168,67,0.3); }
+
+.topbar-right { display:flex; align-items:center; gap:10px; }
+
+.lang-btn {
+background:#181714; border:1px solid #252320;
+color:#6B6560; padding:5px 12px; border-radius:16px;
+font-size:0.78rem; cursor:pointer; transition:all 0.2s;
+font-family:‘DM Sans’,sans-serif;
+}
+.lang-btn.active { background:#D4A843; color:#0A0A08; border-color:#D4A843; font-weight:600; }
+
+.upgrade-btn {
+background:#D4A843; color:#0A0A08;
+border:none; padding:7px 14px; border-radius:8px;
+font-size:0.78rem; font-weight:700; cursor:pointer;
+font-family:‘Syne’,sans-serif; transition:all 0.2s;
+display:none;
+}
+.upgrade-btn:hover { background:var(–gold2); }
+
+/* TABS */
+.tabs {
+display:flex; background:#111110;
+border-bottom:1px solid #252320;
+overflow-x:auto; scrollbar-width:none;
+}
+
+.tab {
+padding:13px 18px; font-size:0.82rem; color:#6B6560;
+cursor:pointer; white-space:nowrap;
+border-bottom:2px solid transparent; transition:all 0.2s;
+display:flex; align-items:center; gap:6px;
+}
+.tab.active { color:#D4A843; border-bottom-color:#D4A843; }
+
+.tab .lock-icon { font-size:0.7rem; opacity:0.5; }
+
+/* PANELS */
+.panel { display:none; flex:1; flex-direction:column; }
+.panel.active { display:flex; }
+
+/* LOCK OVERLAY */
+.lock-overlay {
+position:absolute; inset:0; z-index:50;
+background:rgba(12,12,10,0.88); backdrop-filter:blur(4px);
+display:flex; flex-direction:column;
+align-items:center; justify-content:center; text-align:center;
+padding:32px;
+}
+.lock-overlay .lock-icon2 { font-size:2.5rem; margin-bottom:16px; }
+.lock-overlay h3 { font-family:‘Syne’,sans-serif; font-size:1.2rem; font-weight:800; margin-bottom:8px; }
+.lock-overlay p { font-size:0.85rem; color:#9B9590; max-width:260px; line-height:1.6; margin-bottom:20px; }
+.lock-overlay button {
+background:#D4A843; color:#0A0A08;
+border:none; padding:12px 24px; border-radius:10px;
+font-size:0.88rem; font-weight:700;
+font-family:‘Syne’,sans-serif; cursor:pointer;
+}
+
+/* CHAT */
+.chat-wrap { display:flex; flex-direction:column; height:calc(100vh - 130px); position:relative; }
+.messages { flex:1; overflow-y:auto; padding:16px; display:flex; flex-direction:column; gap:14px; scrollbar-width:thin; scrollbar-color:#252320 transparent; }
+
+.msg { display:flex; gap:10px; animation:fadeUp 0.3s ease; }
+.msg.user { flex-direction:row-reverse; }
+
+.av {
+width:34px; height:34px; border-radius:50%; flex-shrink:0;
+display:flex; align-items:center; justify-content:center; font-size:0.85rem;
+}
+.av.ai { font-weight:800; font-family:‘Syne’,sans-serif; color:#0A0A08; }
+.av.user { background:#181714; border:1px solid #252320; }
+
+.bub {
+max-width:72%; padding:11px 14px; border-radius:14px;
+font-size:0.88rem; line-height:1.6;
+}
+.bub.ai { background:#181714; border:1px solid #252320; border-radius:4px 14px 14px 14px; }
+.bub.user { border-radius:14px 4px 14px 14px; font-weight:500; }
+
+.typing-dots { display:flex; gap:4px; padding:3px 0; align-items:center; }
+.typing-dots span {
+width:6px; height:6px; border-radius:50%; animation:bounce 1.2s infinite;
+}
+.typing-dots span:nth-child(2) { animation-delay:0.2s; }
+.typing-dots span:nth-child(3) { animation-delay:0.4s; }
+@keyframes bounce { 0%,60%,100%{transform:translateY(0);opacity:0.4} 30%{transform:translateY(-6px);opacity:1} }
+
+.quick-row { padding:8px 16px; display:flex; gap:8px; overflow-x:auto; scrollbar-width:none; border-top:1px solid #252320; }
+.q-btn {
+background:#181714; border:1px solid #252320;
+color:#EDE8DF; padding:6px 13px; border-radius:20px;
+font-size:0.78rem; cursor:pointer; white-space:nowrap;
+transition:all 0.2s; font-family:‘DM Sans’,sans-serif;
+}
+.q-btn:hover { border-color:#D4A843; color:#D4A843; }
+
+.input-row { padding:10px 14px; display:flex; gap:8px; background:#111110; border-top:1px solid #252320; }
+.input-row input {
+flex:1; background:#181714; border:1px solid #252320;
+color:#EDE8DF; padding:11px 14px; border-radius:22px;
+font-size:0.88rem; font-family:‘DM Sans’,sans-serif; outline:none; transition:border-color 0.2s;
+}
+.input-row input:focus { border-color:#D4A843; }
+.input-row input::placeholder { color:#6B6560; }
+
+.send-btn {
+background:#D4A843; border:none; color:#0A0A08;
+width:42px; height:42px; border-radius:50%; cursor:pointer;
+font-size:1rem; display:flex; align-items:center; justify-content:center;
+transition:all 0.2s; flex-shrink:0;
+}
+.send-btn:hover { background:var(–gold2); }
+.send-btn:disabled { background:#252320; cursor:not-allowed; }
+
+/* MENU */
+.menu-wrap { padding:16px; overflow-y:auto; }
+.cat-title { font-family:‘Syne’,sans-serif; font-size:0.95rem; font-weight:700; color:#D4A843; margin:16px 0 10px; display:flex; align-items:center; gap:8px; }
+.menu-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(150px,1fr)); gap:10px; margin-bottom:8px; }
+
+.m-card {
+background:#181714; border:1px solid #252320;
+border-radius:12px; padding:14px; cursor:pointer; transition:all 0.2s;
+}
+.m-card:hover { border-color:#D4A843; transform:translateY(-2px); }
+.m-emoji { font-size:1.7rem; margin-bottom:8px; }
+.m-name { font-size:0.85rem; font-weight:600; margin-bottom:3px; }
+.m-price { font-size:0.82rem; color:#D4A843; font-weight:700; }
+.m-desc { font-size:0.72rem; color:#6B6560; margin-top:4px; }
+
+/* ORDER */
+.order-wrap { flex:1; overflow-y:auto; padding:16px; display:flex; flex-direction:column; gap:10px; }
+.o-item {
+background:#181714; border:1px solid #252320;
+border-radius:12px; padding:14px;
+display:flex; align-items:center; gap:12px;
+animation:fadeUp 0.3s ease;
+}
+.o-info { flex:1; }
+.o-name { font-size:0.88rem; font-weight:600; }
+.o-price { font-size:0.82rem; color:#D4A843; margin-top:2px; }
+.qty-ctrl { display:flex; align-items:center; gap:8px; }
+.qty-btn {
+background:#111110; border:1px solid #252320;
+color:#EDE8DF; width:26px; height:26px; border-radius:50%;
+cursor:pointer; font-size:1rem; display:flex; align-items:center; justify-content:center;
+transition:all 0.2s; font-family:‘DM Sans’,sans-serif;
+}
+.qty-btn:hover { border-color:#D4A843; color:#D4A843; }
+.qty { font-size:0.88rem; min-width:18px; text-align:center; }
+
+.order-footer {
+background:#111110; border-top:1px solid #252320; padding:16px;
+}
+.total-row { display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; }
+.total-lbl { font-size:0.88rem; color:#6B6560; }
+.total-val { font-family:‘Syne’,sans-serif; font-size:1.3rem; color:#D4A843; font-weight:800; }
+.confirm-btn {
+width:100%; background:#C94040; border:none; color:white;
+padding:14px; border-radius:10px; font-size:0.92rem; font-weight:700;
+font-family:‘Syne’,sans-serif; cursor:pointer; transition:all 0.2s;
+}
+.confirm-btn:hover { background:#d44444; }
+
+.empty-state { text-align:center; padding:48px 24px; color:#6B6560; }
+.empty-state .big { font-size:3rem; margin-bottom:12px; }
+.empty-state p { font-size:0.88rem; }
+
+/* MANAGER */
+.mgr-wrap { padding:16px; overflow-y:auto; position:relative; }
+
+.stats-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:10px; margin-bottom:20px; }
+.stat-card { background:#181714; border:1px solid #252320; border-radius:12px; padding:16px; }
+.stat-val { font-family:‘Syne’,sans-serif; font-size:1.6rem; font-weight:800; color:#D4A843; }
+.stat-lbl { font-size:0.75rem; color:#6B6560; margin-top:3px; }
+
+.ai-tip {
+background:linear-gradient(135deg, #161200, #1a1500);
+border:1px solid rgba(212,168,67,0.3); border-radius:12px; padding:16px; margin-bottom:16px;
+}
+.ai-tip-tag { font-size:0.7rem; color:#D4A843; letter-spacing:2px; text-transform:uppercase; font-weight:700; margin-bottom:8px; }
+.ai-tip p { font-size:0.85rem; line-height:1.6; }
+
+.stock-item {
+background:#181714; border:1px solid #252320; border-radius:10px;
+padding:12px 14px; display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;
+}
+.stock-name { font-size:0.87rem; }
+.badge { padding:3px 9px; border-radius:20px; font-size:0.7rem; font-weight:700; }
+.badge.ok { background:rgba(61,170,106,0.15); color:#3DAA6A; }
+.badge.low { background:rgba(201,64,64,0.15); color:#C94040; }
+
+/* SETTINGS */
+.settings-wrap { padding:16px; overflow-y:auto; position:relative; }
+.settings-section { margin-bottom:24px; }
+.settings-title { font-family:‘Syne’,sans-serif; font-size:0.8rem; font-weight:700; letter-spacing:2px; text-transform:uppercase; color:#6B6560; margin-bottom:12px; }
+
+.s-field { margin-bottom:12px; }
+.s-field label { display:block; font-size:0.78rem; color:#6B6560; margin-bottom:5px; }
+.s-field input, .s-field select, .s-field textarea {
+width:100%; background:#111110; border:1px solid #252320;
+color:#EDE8DF; padding:11px 13px; border-radius:8px;
+font-size:0.88rem; font-family:‘DM Sans’,sans-serif; outline:none; transition:border-color 0.2s;
+}
+.s-field input:focus, .s-field select:focus { border-color:#D4A843; }
+
+.color-row { display:flex; gap:8px; flex-wrap:wrap; }
+.color-swatch {
+width:32px; height:32px; border-radius:8px; cursor:pointer;
+border:2px solid transparent; transition:all 0.2s;
+}
+.color-swatch.selected { border-color:white; transform:scale(1.1); }
+
+.save-btn {
+background:#D4A843; border:none; color:#0A0A08;
+padding:12px 24px; border-radius:8px; font-size:0.88rem; font-weight:700;
+font-family:‘Syne’,sans-serif; cursor:pointer; transition:all 0.2s;
+}
+.save-btn:hover { background:var(–gold2); }
+
+.cart-badge {
+background:#C94040; color:white;
+width:17px; height:17px; border-radius:50%; font-size:0.68rem;
+display:inline-flex; align-items:center; justify-content:center; font-weight:700;
+}
+
+.toast {
+position:fixed; bottom:80px; left:50%; transform:translateX(-50%) translateY(20px);
+background:#3DAA6A; color:white; padding:9px 18px; border-radius:22px;
+font-size:0.82rem; font-weight:500; opacity:0; transition:all 0.3s;
+z-index:999; pointer-events:none;
+}
+.toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+
+/* UPGRADE MODAL */
+.umodal-overlay {
+position:fixed; inset:0; z-index:200;
+background:rgba(0,0,0,0.85); backdrop-filter:blur(8px);
+display:flex; align-items:center; justify-content:center; padding:20px;
+opacity:0; pointer-events:none; transition:opacity 0.3s;
+}
+.umodal-overlay.open { opacity:1; pointer-events:all; }
+
+.umodal {
+background:#181714; border:1px solid #D4A843;
+border-radius:20px; padding:36px 28px; max-width:420px; width:100%;
+transform:translateY(20px); transition:transform 0.3s;
+position:relative; text-align:center;
+}
+.umodal-overlay.open .umodal { transform:translateY(0); }
+
+.umodal h3 { font-family:‘Syne’,sans-serif; font-size:1.4rem; font-weight:800; margin-bottom:8px; }
+.umodal p { font-size:0.87rem; color:#9B9590; line-height:1.6; margin-bottom:24px; }
+
+.umodal-feats { text-align:left; background:#111110; border-radius:12px; padding:16px; margin-bottom:24px; }
+.umodal-feat { display:flex; align-items:center; gap:10px; font-size:0.85rem; padding:6px 0; }
+.umodal-feat .c { color:#D4A843; }
+
+.umodal-price { font-family:‘Syne’,sans-serif; font-size:2rem; font-weight:800; color:#D4A843; margin-bottom:4px; }
+.umodal-price span { font-size:0.9rem; color:#6B6560; font-weight:400; }
+.umodal-note { font-size:0.78rem; color:#6B6560; margin-bottom:20px; }
+
+.umodal-btn {
+width:100%; padding:14px; border-radius:10px; border:none;
+background:#D4A843; color:#0A0A08; font-size:0.92rem; font-weight:700;
+font-family:‘Syne’,sans-serif; cursor:pointer; transition:all 0.2s;
+}
+.umodal-btn:hover { background:var(–gold2); }
+
+.umodal-close {
+position:absolute; top:14px; right:16px; background:none; border:none;
+color:#6B6560; font-size:1.3rem; cursor:pointer;
+}
+
+@keyframes fadeUp { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
+
+@media(max-width:400px) {
+.menu-grid { grid-template-columns:repeat(2,1fr); }
+.stats-grid { grid-template-columns:repeat(2,1fr); }
+.plan-cards { grid-template-columns:1fr; }
+}
+</style>
+
+</head>
+<body>
+
+<!-- ============ ONBOARDING ============ -->
+
+<div class="screen active" id="screen-onboard">
+  <div class="ob-card">
+    <div class="ob-logo">Book<em>maker</em></div>
+    <div class="ob-progress">
+      <div class="ob-dot active" id="dot0"></div>
+      <div class="ob-dot" id="dot1"></div>
+      <div class="ob-dot" id="dot2"></div>
+    </div>
+
+```
+<!-- STEP 0 : Infos resto -->
+<div class="ob-step active" id="step0">
+  <div class="ob-title">Votre établissement</div>
+  <div class="ob-sub">Configurons votre Bookmaker en 3 étapes rapides.</div>
+
+  <div class="ob-field">
+    <label>Nom de l'établissement *</label>
+    <input type="text" id="ob-name" placeholder="Ex: Chez Mama Céleste" oninput="updatePreview()">
+  </div>
+  <div class="ob-grid2">
+    <div class="ob-field">
+      <label>Type *</label>
+      <select id="ob-type" onchange="updatePreview()">
+        <option value="maquis">🏚️ Maquis / Gargote</option>
+        <option value="resto">🍽️ Restaurant</option>
+        <option value="truck">🚐 Food Truck</option>
+        <option value="delivery">📦 Livraison</option>
+      </select>
+    </div>
+    <div class="ob-field">
+      <label>Ville *</label>
+      <select id="ob-city">
+        <option>Brazzaville</option>
+        <option>Kinshasa</option>
+        <option>Pointe-Noire</option>
+        <option>Lubumbashi</option>
+        <option>Autre</option>
+      </select>
+    </div>
+  </div>
+  <div class="ob-field">
+    <label>Description courte</label>
+    <textarea id="ob-desc" placeholder="Cuisine traditionnelle congolaise depuis 2018..."></textarea>
+  </div>
+  <button class="ob-btn" onclick="nextStep(1)">Continuer →</button>
+</div>
+
+<!-- STEP 1 : Personnalisation -->
+<div class="ob-step" id="step1">
+  <div class="ob-title">Personnalisation</div>
+  <div class="ob-sub">Choisissez l'identité visuelle de votre Bookmaker.</div>
+
+  <div class="ob-field">
+    <label>Emoji / Logo de votre établissement</label>
+    <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:4px;">
+      <span style="font-size:1.8rem; cursor:pointer;" onclick="selectEmoji(this,'🏚️')">🏚️</span>
+      <span style="font-size:1.8rem; cursor:pointer;" onclick="selectEmoji(this,'🍽️')">🍽️</span>
+      <span style="font-size:1.8rem; cursor:pointer;" onclick="selectEmoji(this,'🚐')">🚐</span>
+      <span style="font-size:1.8rem; cursor:pointer;" onclick="selectEmoji(this,'🌿')">🌿</span>
+      <span style="font-size:1.8rem; cursor:pointer;" onclick="selectEmoji(this,'🔥')">🔥</span>
+      <span style="font-size:1.8rem; cursor:pointer;" onclick="selectEmoji(this,'⭐')">⭐</span>
+      <span style="font-size:1.8rem; cursor:pointer;" onclick="selectEmoji(this,'🥘')">🥘</span>
+      <span style="font-size:1.8rem; cursor:pointer;" onclick="selectEmoji(this,'🍖')">🍖</span>
+    </div>
+  </div>
+
+  <div class="ob-field">
+    <label>Couleur principale</label>
+    <div class="color-row">
+      <div class="color-swatch selected" style="background:#D4A843" onclick="selectColor('#D4A843',this)"></div>
+      <div class="color-swatch" style="background:#C94040" onclick="selectColor('#C94040',this)"></div>
+      <div class="color-swatch" style="background:#3DAA6A" onclick="selectColor('#3DAA6A',this)"></div>
+      <div class="color-swatch" style="background:#4A7CC7" onclick="selectColor('#4A7CC7',this)"></div>
+      <div class="color-swatch" style="background:#9B59B6" onclick="selectColor('#9B59B6',this)"></div>
+      <div class="color-swatch" style="background:#E07B39" onclick="selectColor('#E07B39',this)"></div>
+    </div>
+  </div>
+
+  <div class="ob-field">
+    <label>Langue de l'interface</label>
+    <select id="ob-lang">
+      <option value="fr">Français</option>
+      <option value="en">English</option>
+    </select>
+  </div>
+
+  <button class="ob-btn" onclick="nextStep(2)">Continuer →</button>
+  <button class="ob-btn ob-back" onclick="nextStep(0)">← Retour</button>
+</div>
+
+<!-- STEP 2 : Plan -->
+<div class="ob-step" id="step2">
+  <div class="ob-title">Choisissez votre plan</div>
+  <div class="ob-sub">Commencez gratuitement, évoluez à votre rythme.</div>
+
+  <div class="plan-cards">
+    <div class="plan-opt selected" id="plan-free" onclick="selectPlan('free')">
+      <div class="plan-check">✓</div>
+      <div class="p-name">Gratuit</div>
+      <div class="p-price">0 <span>FCFA/mois</span></div>
+      <div class="p-feats">10 plats · 50 msg/jour · FR seulement</div>
+    </div>
+    <div class="plan-opt pro-opt" id="plan-pro" onclick="selectPlan('pro')">
+      <div class="plan-check">✓</div>
+      <div class="p-name" style="color:#D4A843">Pro ⭐</div>
+      <div class="p-price">15 000 <span>FCFA/mois</span></div>
+      <div class="p-feats">Illimité · FR+EN · Dashboard · Stock</div>
+    </div>
+  </div>
+
+  <button class="ob-btn" onclick="launchApp()">Lancer mon Bookmaker 🚀</button>
+  <button class="ob-btn ob-back" onclick="nextStep(1)">← Retour</button>
+</div>
+```
+
+  </div>
+</div>
+
+<!-- ============ APP ============ -->
+
+<div class="screen" id="screen-app">
+
+  <!-- TOPBAR -->
+
+  <div class="topbar">
+    <div class="topbar-left">
+      <div class="resto-avatar" id="app-avatar">🍽️</div>
+      <div>
+        <div class="resto-name" id="app-name">Mon Restaurant</div>
+        <div class="resto-type" id="app-type">Restaurant</div>
+      </div>
+      <div class="plan-tag" id="plan-tag">FREE</div>
+    </div>
+    <div class="topbar-right">
+      <button class="lang-btn active" id="btn-fr" onclick="setLang('fr')">FR</button>
+      <button class="lang-btn" id="btn-en" onclick="setLang('en')" style="position:relative">EN <span id="en-lock" style="font-size:0.6rem">🔒</span></button>
+      <button class="upgrade-btn" id="upgrade-btn" onclick="openUpgrade()">⭐ Passer Pro</button>
+    </div>
+  </div>
+
+  <!-- TABS -->
+
+  <div class="tabs" id="tabs">
+    <div class="tab active" onclick="showTab('chat')" id="tab-chat">🤖 <span id="t-chat">Assistant</span></div>
+    <div class="tab" onclick="showTab('menu')" id="tab-menu">🍽️ <span id="t-menu">Menu</span></div>
+    <div class="tab" onclick="showTab('order')" id="tab-order">🛒 <span id="t-order">Commande</span> <span id="cart-badge" class="cart-badge" style="display:none">0</span></div>
+    <div class="tab" onclick="showTab('manager')" id="tab-mgr">📊 <span id="t-mgr">Gérant</span></div>
+    <div class="tab" onclick="handleLockedTab('delivery')" id="tab-delivery">🚐 <span id="t-delivery">Livraison</span> <span style="font-size:0.65rem">🔒</span></div>
+    <div class="tab" onclick="showTab('settings')" id="tab-set">⚙️ <span id="t-set">Config</span></div>
+  </div>
+
+  <!-- CHAT PANEL -->
+
+  <div class="panel active" id="panel-chat">
+    <div class="chat-wrap">
+      <div class="messages" id="messages"></div>
+      <div class="quick-row" id="quick-row"></div>
+      <div class="input-row">
+        <input type="text" id="chat-input" placeholder="Écrivez un message..." onkeydown="if(event.key==='Enter')sendMsg()">
+        <button class="send-btn" id="send-btn" onclick="sendMsg()">➤</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MENU PANEL -->
+
+  <div class="panel" id="panel-menu">
+    <div class="menu-wrap" id="menu-wrap"></div>
+  </div>
+
+  <!-- ORDER PANEL -->
+
+  <div class="panel" id="panel-order">
+    <div class="order-wrap" id="order-wrap"></div>
+    <div class="order-footer" id="order-footer" style="display:none">
+      <div class="total-row">
+        <span class="total-lbl" id="lbl-total">Total</span>
+        <span class="total-val" id="total-val">0 FCFA</span>
+      </div>
+      <button class="confirm-btn" id="confirm-btn" onclick="confirmOrder()">Confirmer la commande</button>
+    </div>
+  </div>
+
+  <!-- MANAGER PANEL -->
+
+  <div class="panel" id="panel-manager">
+    <div class="mgr-wrap" id="mgr-wrap" style="position:relative"></div>
+  </div>
+
+  <!-- DELIVERY PANEL (locked) -->
+
+  <div class="panel" id="panel-delivery">
+    <div style="padding:24px">
+      <div style="background:#1C1A17;border:1px solid rgba(212,168,67,0.3);border-radius:16px;padding:24px;text-align:center">
+        <div style="font-size:2.5rem;margin-bottom:12px">🚐</div>
+        <div style="font-family:Syne,sans-serif;font-size:1.1rem;font-weight:800;margin-bottom:8px">Mode Livraison</div>
+        <div style="font-size:0.85rem;color:#9B9590;line-height:1.6;margin-bottom:20px">Gérez vos commandes en ligne, suivez vos livreurs et développez votre clientèle hors site.</div>
+        <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:20px;text-align:left">
+          <div style="display:flex;align-items:center;gap:10px;font-size:0.85rem"><span style="color:#D4A843">✓</span> Commandes en ligne partageable</div>
+          <div style="display:flex;align-items:center;gap:10px;font-size:0.85rem"><span style="color:#D4A843">✓</span> Suivi des livraisons en temps réel</div>
+          <div style="display:flex;align-items:center;gap:10px;font-size:0.85rem"><span style="color:#D4A843">✓</span> Gestion des zones de livraison</div>
+          <div style="display:flex;align-items:center;gap:10px;font-size:0.85rem"><span style="color:#D4A843">✓</span> Historique des commandes</div>
+        </div>
+        <button onclick="openUpgrade()" style="width:100%;background:#D4A843;border:none;color:#0C0C0A;padding:14px;border-radius:10px;font-size:0.92rem;font-weight:700;font-family:Syne,sans-serif;cursor:pointer">Débloquer avec Pro ⭐</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SETTINGS PANEL -->
+
+  <div class="panel" id="panel-settings">
+    <div class="settings-wrap" id="settings-wrap" style="position:relative"></div>
+  </div>
+
+</div>
+
+<!-- UPGRADE MODAL -->
+
+<div class="umodal-overlay" id="umodal">
+  <div class="umodal">
+    <button class="umodal-close" onclick="closeUpgrade()">×</button>
+    <div style="font-size:2rem;margin-bottom:12px">⭐</div>
+    <h3>Passer au Plan Pro</h3>
+    <p>Débloquez toutes les fonctionnalités pour développer votre établissement.</p>
+    <div class="umodal-feats">
+      <div class="umodal-feat"><span class="c">✓</span> Menu illimité + photos de plats</div>
+      <div class="umodal-feat"><span class="c">✓</span> Assistant IA messages illimités</div>
+      <div class="umodal-feat"><span class="c">✓</span> Bilingue Français + Anglais</div>
+      <div class="umodal-feat"><span class="c">✓</span> Tableau de bord gérant complet</div>
+      <div class="umodal-feat"><span class="c">✓</span> Gestion des stocks en temps réel</div>
+      <div class="umodal-feat"><span class="c">✓</span> Personnalisation logo & couleurs</div>
+      <div class="umodal-feat"><span class="c">✓</span> Statistiques & rapports hebdo</div>
+    </div>
+    <div class="umodal-price">15 000 <span>FCFA / mois</span></div>
+    <div class="umodal-note">14 jours d'essai gratuit · Sans engagement</div>
+    <button class="umodal-btn" onclick="activatePro()">Activer le Plan Pro →</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ===== STATE =====
+let config = {
+  name: '', type: 'resto', city: 'Brazzaville', desc: '',
+  emoji: '🍽️', color: '#D4A843', lang: 'fr', plan: 'free',
+  restaurantMenu: [] // Menu entièrement créé par le gérant
+};
+let lang = 'fr';
+let cart = [];
+let isTyping = false;
+let obStep = 0;
+
+// ===== TRANSLATIONS =====
+const T = {
+  fr: {
+    tabs: ['Assistant','Menu','Commande','Gérant','Config'],
+    welcome: n => `Bienvenue chez **${n}** ! 👋\nJe suis votre assistant Bookmaker. Je peux vous aider à :\n• Passer une commande\n• Découvrir notre menu\n• Répondre à vos questions\n\nComment puis-je vous aider ?`,
+    quick: ['Voir le menu 🍽️', 'Recommande-moi un plat', 'Plat du jour', 'Spécialités maison'],
+    added: '✓ Ajouté au panier',
+    confirmed: '🎉 Commande confirmée !',
+    empty: 'Votre panier est vide',
+    emptySub: 'Explorez le menu et ajoutez des plats',
+    confirmBtn: 'Confirmer la commande',
+    total: 'Total',
+    placeholder: 'Écrivez un message...',
+    upgradeMsg: items => `✅ Commande confirmée ! ${items} article(s) en préparation.\n⏱️ Temps estimé : 20-30 min. Merci ! 😊`,
+  },
+  en: {
+    tabs: ['Assistant','Menu','Order','Manager','Settings'],
+    welcome: n => `Welcome to **${n}**! 👋\nI'm your Bookmaker assistant. I can help you:\n• Place an order\n• Discover our menu\n• Answer your questions\n\nHow can I help you?`,
+    quick: ['See menu 🍽️', 'Recommend a dish', "Today's special", 'House specialties'],
+    added: '✓ Added to cart',
+    confirmed: '🎉 Order confirmed!',
+    empty: 'Your cart is empty',
+    emptySub: 'Browse the menu and add dishes',
+    confirmBtn: 'Confirm order',
+    total: 'Total',
+    placeholder: 'Write a message...',
+    upgradeMsg: items => `✅ Order confirmed! ${items} item(s) being prepared.\n⏱️ Estimated time: 20-30 min. Thank you! 😊`,
+  }
+};
+
+// ===== MENU DATA =====
+// Pas de menu prédéfini — chaque restaurant crée le sien
+const menuData = [];
+
+// ===== ONBOARDING =====
+function nextStep(s) {
+  if (s === 1) {
+    const n = document.getElementById('ob-name').value.trim();
+    config.name = n || 'Mon Restaurant';
+    config.type = document.getElementById('ob-type').value;
+    config.city = document.getElementById('ob-city').value;
+    config.desc = document.getElementById('ob-desc').value;
+  }
+  if (s === 2) {
+    config.lang = document.getElementById('ob-lang').value;
+  }
+  obStep = s;
+  document.querySelectorAll('.ob-step').forEach((el,i) => el.classList.toggle('active', i===s));
+  document.querySelectorAll('.ob-dot').forEach((el,i) => el.classList.toggle('active', i<=s));
+}
+
+function updatePreview() {}
+
+function selectEmoji(el, em) {
+  document.querySelectorAll('[onclick^="selectEmoji"]').forEach(e => e.style.opacity='0.5');
+  el.style.opacity = '1';
+  config.emoji = em;
+}
+
+function selectColor(c, el) {
+  document.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('selected'));
+  el.classList.add('selected');
+  config.color = c;
+  document.documentElement.style.setProperty('--gold', c);
+}
+
+function selectPlan(p) {
+  config.plan = p;
+  document.getElementById('plan-free').classList.toggle('selected', p==='free');
+  document.getElementById('plan-pro').classList.toggle('selected', p==='pro');
+}
+
+function launchApp() {
+  lang = config.lang;
+  applyConfig();
+  document.getElementById('screen-onboard').classList.remove('active');
+  document.getElementById('screen-app').classList.add('active');
+  initApp();
+}
+
+// ===== APP =====
+function applyConfig() {
+  document.documentElement.style.setProperty('--gold', config.color);
+  document.getElementById('app-avatar').textContent = config.emoji;
+  document.getElementById('app-avatar').style.background = config.color + '22';
+  document.getElementById('app-avatar').style.color = config.color;
+  document.getElementById('app-name').textContent = config.name || 'Mon Restaurant';
+  const types = { maquis:'Maquis / Gargote', resto:'Restaurant', truck:'Food Truck', delivery:'Livraison' };
+  document.getElementById('app-type').textContent = (types[config.type] || 'Restaurant') + ' · ' + config.city;
+
+  const isPro = config.plan === 'pro';
+  const tag = document.getElementById('plan-tag');
+  tag.textContent = isPro ? 'PRO ⭐' : 'FREE';
+  tag.className = 'plan-tag ' + (isPro ? 'pro' : 'free');
+
+  document.getElementById('upgrade-btn').style.display = isPro ? 'none' : 'block';
+
+  // lock tabs
+  const lockMgr = document.getElementById('lock-mgr');
+  const lockMgr2 = document.getElementById('lock-mgr');
+  if (lockMgr2) lockMgr2.style.display = isPro ? 'none' : 'inline';
+
+  // lang buttons
+  const enLock = document.getElementById('en-lock');
+  if (enLock) enLock.style.display = isPro ? 'none' : 'inline';
+
+  // Color lock in settings - only allow custom colors in Pro
+  // (handled in renderSettings)
+
+  updateTabLabels();
+}
+
+function updateTabLabels() {
+  const tabs = T[lang].tabs;
+  ['t-chat','t-menu','t-order','t-mgr','t-set'].forEach((id,i) => {
+    const el = document.getElementById(id);
+    if(el) el.textContent = tabs[i];
+  });
+  document.getElementById('lbl-total').textContent = T[lang].total;
+  document.getElementById('confirm-btn').textContent = T[lang].confirmBtn;
+  document.getElementById('chat-input').placeholder = T[lang].placeholder;
+}
+
+function initApp() {
+  addMsg('ai', T[lang].welcome(config.name));
+  renderQuick();
+  renderMenu();
+  renderOrder();
+  renderManager();
+  renderSettings();
+}
+
+// ===== LANG =====
+function setLang(l) {
+  if (l === 'en' && config.plan !== 'pro') { openUpgrade(); return; }
+  lang = l;
+  document.getElementById('btn-fr').classList.toggle('active', l==='fr');
+  document.getElementById('btn-en').classList.toggle('active', l==='en');
+  updateTabLabels();
+  renderQuick();
+  renderMenu();
+  renderOrder();
+  renderManager();
+}
+
+// ===== TABS =====
+function showTab(id) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('panel-'+id).classList.add('active');
+  document.getElementById('tab-'+(id==='manager'?'mgr':id==='settings'?'set':id)).classList.add('active');
+}
+
+function handleLockedTab(id) {
+  if (id === 'manager' && config.plan !== 'pro') { openUpgrade(); return; }
+  showTab(id);
+}
+
+// ===== CHAT =====
+function renderQuick() {
+  const c = document.getElementById('quick-row');
+  c.innerHTML = T[lang].quick.map(q => `<button class="q-btn" onclick="sendQuick('${q}')">${q}</button>`).join('');
+}
+
+function addMsg(role, text) {
+  const msgs = document.getElementById('messages');
+  const div = document.createElement('div');
+  div.className = `msg ${role}`;
+  const html = text.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/\n/g,'<br>').replace(/•/g,'·');
+  const av = role === 'ai'
+    ? `<div class="av ai" style="background:${config.color}22;color:${config.color}">${config.emoji}</div>`
+    : `<div class="av user">👤</div>`;
+  const bub = role === 'ai'
+    ? `<div class="bub ai">${html}</div>`
+    : `<div class="bub user" style="background:${config.color};color:#0C0C0A">${html}</div>`;
+  div.innerHTML = role === 'ai' ? `${av}${bub}` : `${bub}${av}`;
+  msgs.appendChild(div);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+function showTyping() {
+  const msgs = document.getElementById('messages');
+  const d = document.createElement('div');
+  d.className = 'msg ai'; d.id = 'typing';
+  d.innerHTML = `<div class="av ai" style="background:${config.color}22;color:${config.color}">${config.emoji}</div><div class="bub ai"><div class="typing-dots"><span style="background:${config.color}"></span><span style="background:${config.color}"></span><span style="background:${config.color}"></span></div></div>`;
+  msgs.appendChild(d); msgs.scrollTop = msgs.scrollHeight;
+}
+
+function removeTyping() { const el=document.getElementById('typing'); if(el) el.remove(); }
+
+async function sendMsg() {
+  const inp = document.getElementById('chat-input');
+  const text = inp.value.trim();
+  if (!text || isTyping) return;
+  inp.value = '';
+  addMsg('user', text);
+  await getReply(text);
+}
+
+function sendQuick(t) { document.getElementById('chat-input').value=t; sendMsg(); }
+
+async function getReply(userMsg) {
+  isTyping = true;
+  document.getElementById('send-btn').disabled = true;
+  showTyping();
+
+  const isPro = config.plan === 'pro';
+  const types = { maquis:'maquis', resto:'restaurant', truck:'food truck', delivery:'service de livraison' };
+  const menu = config.restaurantMenu || [];
+  const menuCtx = menu.length > 0
+    ? menu.map(i=>`- ${lang==='fr'?i.nameFr:i.nameEn||i.nameFr}: ${Number(i.price).toLocaleString()} FCFA`).join('\n')
+    : (lang==='fr' ? 'Menu en cours de configuration par le gérant.' : 'Menu being configured by the manager.');
+
+  const limitNote = '';
+
+  const sys = lang === 'fr'
+    ? 'Tu es l\'assistante de "' + config.name + '", un ' + types[config.type] + ' à ' + config.city + '.\n\n' +
+      'Personnalité : professionnelle, efficace et agréable. Tu sais exactement ce que tu fais. Chaleureuse sans en faire trop. Une phrase suffit quand c\'est suffisant. Tu es compétente et ça se sent naturellement.\n\n' +
+      'Règles :\n' +
+      '- 2 à 3 phrases maximum, jamais plus\n' +
+      '- Directe et utile avant tout\n' +
+      '- Sobre — pas d\'emojis excessifs, pas d\'enthousiasme forcé\n' +
+      '- Pour les plats : précise et appétissante en peu de mots\n' +
+      '- Pour commander : indique simplement le menu en bas\n' +
+      '- Adapte-toi au ton du client\n\n' +
+      'Menu :\n' + menuCtx
+    : 'You are the assistant of "' + config.name + '", a ' + config.type + ' in ' + config.city + '.\n\n' +
+      'Personality: professional, efficient, pleasant. You know exactly what you are doing. Warm but never over the top. Competent — and it shows.\n\n' +
+      'Rules:\n' +
+      '- Max 2-3 sentences, never more\n' +
+      '- Direct and helpful first\n' +
+      '- No excessive emojis, no forced enthusiasm\n' +
+      '- For dishes: precise and appetizing in few words\n' +
+      '- To order: point to the menu below\n' +
+      '- Adapt to the customer tone\n\n' +
+      'Menu:\n' + menuCtx
+
+  try {
+    const res = await fetch("/api/chat", {
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({ system:sys, messages:[{role:"user",content:userMsg}] })
+    });
+    const data = await res.json();
+    removeTyping();
+    addMsg('ai', data.content?.[0]?.text || (lang==='fr'?'Désolé, une erreur est survenue.':'Sorry, an error occurred.'));
+  } catch {
+    removeTyping();
+    addMsg('ai', lang==='fr'?'Connexion impossible. Veuillez réessayer.':'Connection failed. Please try again.');
+  }
+  isTyping = false;
+  document.getElementById('send-btn').disabled = false;
+}
+
+// ===== MENU =====
+function renderMenu() {
+  const c = document.getElementById('menu-wrap');
+  const isFr = lang === 'fr';
+  const menu = config.restaurantMenu || [];
+
+  if (menu.length === 0) {
+    c.innerHTML = `
+      <div style="text-align:center;padding:48px 24px;color:#6B6560">
+        <div style="font-size:3rem;margin-bottom:12px">🍽️</div>
+        <p style="font-size:0.95rem;font-weight:600;color:#EDE8DF;margin-bottom:8px">${isFr?'Menu non encore configuré':'Menu not configured yet'}</p>
+        <p style="font-size:0.85rem">${isFr?'Le gérant doit ajouter ses plats dans l\'onglet Config':'The manager needs to add dishes in the Config tab'}</p>
+      </div>`;
+    return;
+  }
+
+  // Grouper par catégorie
+  const categories = {};
+  menu.forEach(item => {
+    const cat = item.category || (isFr ? 'Menu' : 'Menu');
+    if (!categories[cat]) categories[cat] = [];
+    categories[cat].push(item);
+  });
+
+  let html = '';
+  Object.entries(categories).forEach(([cat, items]) => {
+    html += `<div class="cat-title">🍽️ ${cat}</div><div class="menu-grid">`;
+    html += items.map(item => `
+      <div class="m-card" onclick="addToCart('${item.id}')">
+        <div class="m-emoji">${item.emoji || '🍽️'}</div>
+        <div class="m-name">${isFr ? item.nameFr : (item.nameEn || item.nameFr)}</div>
+        <div class="m-price">${Number(item.price).toLocaleString()} FCFA</div>
+        <div class="m-desc">${item.description || ''}</div>
+      </div>`).join('');
+    html += '</div>';
+  });
+  c.innerHTML = html;
+}
+
+
+// ===== CART =====
+function addToCart(id) {
+  const menu = config.restaurantMenu || [];
+  const item = menu.find(i => i.id === id);
+  if (!item) return;
+  const ex = cart.find(c => c.id === id);
+  if (ex) ex.qty++;
+  else cart.push({
+    id: item.id,
+    e: item.emoji || '🍽️',
+    fr: item.nameFr,
+    en: item.nameEn || item.nameFr,
+    p: Number(item.price),
+    qty: 1
+  });
+  updateBadge();
+  showToast(T[lang].added);
+}
+
+function updateBadge() {
+  const total = cart.reduce((s,i)=>s+i.qty,0);
+  const b = document.getElementById('cart-badge');
+  b.textContent = total;
+  b.style.display = total > 0 ? 'inline-flex' : 'none';
+}
+
+function renderOrder() {
+  const c = document.getElementById('order-wrap');
+  const foot = document.getElementById('order-footer');
+  if (!cart.length) {
+    c.innerHTML = `<div class="empty-state"><div class="big">🛒</div><p>${T[lang].empty}</p><p style="margin-top:6px;font-size:0.78rem;color:var(--muted)">${T[lang].emptySub}</p></div>`;
+    foot.style.display='none'; return;
+  }
+  foot.style.display='block';
+  c.innerHTML = cart.map(item=>`
+    <div class="o-item">
+      <div style="font-size:1.5rem">${item.e}</div>
+      <div class="o-info">
+        <div class="o-name">${lang==='fr'?item.fr:item.en}</div>
+        <div class="o-price">${(item.p*item.qty).toLocaleString()} FCFA</div>
+      </div>
+      <div class="qty-ctrl">
+        <button class="qty-btn" onclick="changeQty(${item.id},-1)">−</button>
+        <span class="qty">${item.qty}</span>
+        <button class="qty-btn" onclick="changeQty(${item.id},1)">+</button>
+      </div>
+    </div>`).join('');
+  const total = cart.reduce((s,i)=>s+i.p*i.qty,0);
+  document.getElementById('total-val').textContent = total.toLocaleString()+' FCFA';
+  document.getElementById('confirm-btn').textContent = T[lang].confirmBtn;
+}
+
+function changeQty(id, d) {
+  const i = cart.findIndex(c=>c.id===id);
+  if(i===-1) return;
+  cart[i].qty += d;
+  if(cart[i].qty<=0) cart.splice(i,1);
+  updateBadge(); renderOrder();
+}
+
+function confirmOrder() {
+  if (!cart.length) return;
+  const count = cart.reduce((s,i)=>s+i.qty,0);
+  cart=[]; updateBadge(); renderOrder();
+  showToast(T[lang].confirmed);
+  addMsg('ai', T[lang].upgradeMsg(count));
+  showTab('chat');
+}
+
+// ===== MANAGER =====
+function renderManager() {
+  const c = document.getElementById('mgr-wrap');
+  const isPro = config.plan === 'pro';
+  const isFr = lang === 'fr';
+
+  const lockHtml = (title, desc) =>
+    '<div style="position:relative;margin-bottom:10px">' +
+    '<div style="filter:blur(3px);pointer-events:none;background:#1C1A17;border:1px solid #272420;border-radius:12px;padding:14px">' +
+    '<div style="font-family:Syne,sans-serif;font-size:0.85rem;color:#D4A843;margin-bottom:6px">' + title + '</div>' +
+    '<div style="height:40px;background:#272420;border-radius:6px"></div>' +
+    '</div>' +
+    '<div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(12,12,10,0.7);border-radius:12px;border:1px solid rgba(212,168,67,0.3)">' +
+    '<div style="font-size:1.3rem;margin-bottom:4px">🔒</div>' +
+    '<div style="font-size:0.78rem;font-weight:700;color:#D4A843;font-family:Syne,sans-serif">' + desc + '</div>' +
+    '<button onclick="openUpgrade()" style="margin-top:8px;background:#D4A843;border:none;color:#0C0C0A;padding:5px 14px;border-radius:20px;font-size:0.75rem;font-weight:700;font-family:Syne,sans-serif;cursor:pointer">Passer Pro ⭐</button>' +
+    '</div></div>';
+
+  // Stats simples (disponibles en free)
+  let html =
+    '<div class="stats-grid" style="margin-bottom:16px">' +
+      '<div class="stat-card"><div class="stat-val">47</div><div class="stat-lbl">' + (isFr?'Commandes aujourd\'hui':'Orders today') + '</div></div>' +
+      '<div class="stat-card"><div class="stat-val">12</div><div class="stat-lbl">' + (isFr?'Tables occupées':'Tables occupied') + '</div></div>' +
+    '</div>';
+
+  if (isPro) {
+    // Stats complètes Pro
+    html +=
+      '<div class="stats-grid" style="margin-bottom:16px">' +
+        '<div class="stat-card"><div class="stat-val">182K</div><div class="stat-lbl">' + (isFr?'Revenus FCFA':'Revenue FCFA') + '</div></div>' +
+        '<div class="stat-card"><div class="stat-val">4.8⭐</div><div class="stat-lbl">' + (isFr?'Note moyenne':'Avg. rating') + '</div></div>' +
+      '</div>' +
+      '<div class="ai-tip">' +
+        '<div class="ai-tip-tag">🤖 ' + (isFr?'Conseil IA':'AI Tip') + '</div>' +
+        '<p>' + (isFr
+          ? 'Le <strong>Poulet Moambe</strong> est en forte demande (+32%). Pensez à préparer plus de sauce. Le <strong>Liboke</strong> est le moins commandé — envisagez une promotion.'
+          : '<strong>Moambe Chicken</strong> is in high demand (+32%). Prepare more sauce. <strong>Liboke</strong> is least ordered — consider a promotion.'
+        ) + '</p>' +
+      '</div>' +
+      '<div style="font-family:Syne,sans-serif;font-size:0.78rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#6B6560;margin-bottom:10px">' + (isFr?'STOCK EN TEMPS RÉEL':'REAL-TIME STOCK') + '</div>' +
+      [
+        {n:isFr?'Feuilles de manioc':'Cassava leaves', s:'ok'},
+        {n:isFr?'Poisson fumé':'Smoked fish', s:'low'},
+        {n:isFr?'Huile de palme':'Palm oil', s:'ok'},
+        {n:isFr?'Riz (50kg)':'Rice (50kg)', s:'low'},
+      ].map(s =>
+        '<div class="stock-item"><span class="stock-name">' + s.n + '</span>' +
+        '<span class="badge ' + s.s + '">' + (s.s==='ok'?'✓ OK':(isFr?'⚠ Réapprovisionner':'⚠ Reorder')) + '</span></div>'
+      ).join('');
+  } else {
+    // Fonctionnalités Pro visibles mais verrouillées
+    html +=
+      '<div style="margin-bottom:16px;padding:12px;background:rgba(212,168,67,0.06);border:1px dashed rgba(212,168,67,0.3);border-radius:10px;font-size:0.82rem;color:#9B9590">' +
+        '💡 ' + (isFr
+          ? 'Passez Pro pour débloquer les revenus, conseils IA, gestion des stocks et rapports hebdomadaires.'
+          : 'Upgrade to Pro to unlock revenue tracking, AI tips, stock management and weekly reports.') +
+      '</div>' +
+
+      lockHtml(
+        isFr ? '💰 Revenus & Statistiques avancées' : '💰 Revenue & Advanced Stats',
+        isFr ? 'Disponible en Pro' : 'Available in Pro'
+      ) +
+
+      lockHtml(
+        isFr ? '🤖 Conseils IA personnalisés' : '🤖 Personalized AI Tips',
+        isFr ? 'Disponible en Pro' : 'Available in Pro'
+      ) +
+
+      lockHtml(
+        isFr ? '📦 Gestion des stocks en temps réel' : '📦 Real-time Stock Management',
+        isFr ? 'Disponible en Pro' : 'Available in Pro'
+      ) +
+
+      // Rapport prêt mais verrouillé
+      '<div style="position:relative;margin-bottom:10px">' +
+        '<div style="background:#1a1700;border:1px solid rgba(212,168,67,0.3);border-radius:12px;padding:14px;filter:blur(2px);pointer-events:none">' +
+          '<div style="font-size:0.72rem;color:#D4A843;letter-spacing:2px;font-weight:700;margin-bottom:6px">📈 ' + (isFr?'RAPPORT DE LA SEMAINE':'WEEKLY REPORT') + '</div>' +
+          '<div style="font-size:0.85rem;color:#EDE8DF">' + (isFr?'Votre rapport est prêt !':'Your report is ready!') + '</div>' +
+          '<div style="font-size:0.78rem;color:#6B6560;margin-top:4px">' + (isFr?'+12% de commandes vs semaine dernière':'+12% orders vs last week') + '</div>' +
+        '</div>' +
+        '<div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(12,12,10,0.75);border-radius:12px;border:1px solid rgba(212,168,67,0.3)">' +
+          '<div style="font-size:1.3rem;margin-bottom:4px">🔒</div>' +
+          '<div style="font-size:0.78rem;font-weight:700;color:#D4A843;font-family:Syne,sans-serif">' + (isFr?'Rapport disponible en Pro':'Report available in Pro') + '</div>' +
+          '<button onclick="openUpgrade()" style="margin-top:8px;background:#D4A843;border:none;color:#0C0C0A;padding:5px 14px;border-radius:20px;font-size:0.75rem;font-weight:700;font-family:Syne,sans-serif;cursor:pointer">Passer Pro ⭐</button>' +
+        '</div>' +
+      '</div>' +
+
+      // Support WhatsApp verrouillé
+      '<div style="margin-top:6px">' +
+        '<button onclick="openUpgrade()" style="width:100%;background:#1C1A17;border:1px solid #272420;border-radius:10px;padding:14px;display:flex;align-items:center;justify-content:space-between;cursor:pointer">' +
+          '<span style="font-size:0.88rem;color:#EDE8DF;font-family:DM Sans,sans-serif">💬 ' + (isFr?'Support WhatsApp prioritaire':'Priority WhatsApp Support') + '</span>' +
+          '<span style="font-size:0.72rem;background:rgba(212,168,67,0.15);color:#D4A843;padding:3px 10px;border-radius:20px;font-weight:700;font-family:Syne,sans-serif">PRO 🔒</span>' +
+        '</button>' +
+      '</div>';
+  }
+
+  c.innerHTML = html;
+}
+
+// ===== SETTINGS =====
+function renderSettings() {
+  const c = document.getElementById('settings-wrap');
+  const isPro = config.plan === 'pro';
+  const isFr = lang === 'fr';
+  const menu = config.restaurantMenu || [];
+
+  const menuListHtml = menu.length > 0
+    ? menu.map((item, i) =>
+        '<div class="o-item" style="margin-bottom:8px">' +
+        '<div style="font-size:1.4rem;margin-right:10px">' + (item.emoji||'🍽️') + '</div>' +
+        '<div class="o-info">' +
+        '<div class="o-name">' + item.nameFr + '</div>' +
+        '<div class="o-price">' + Number(item.price).toLocaleString() + ' FCFA · ' + (item.category||'Menu') + '</div>' +
+        '</div>' +
+        '<button onclick="deleteMenuItem(' + i + ')" style="background:none;border:1px solid #C94040;color:#C94040;padding:4px 10px;border-radius:8px;cursor:pointer;font-size:0.78rem;font-family:DM Sans,sans-serif">✕</button>' +
+        '</div>'
+      ).join('')
+    : '<div style="text-align:center;color:#6B6560;font-size:0.85rem;padding:20px 0">' + (isFr ? 'Aucun plat ajouté pour l\'instant' : 'No dishes added yet') + '</div>';
+
+  const cityOptions = ['Brazzaville','Kinshasa','Pointe-Noire','Lubumbashi','Autre']
+    .map(v => '<option' + (config.city===v?' selected':'') + '>' + v + '</option>').join('');
+
+  const colorSwatches = ['#D4A843','#C94040','#3DAA6A','#4A7CC7','#9B59B6','#E07B39','#E91E8C','#00BCD4']
+    .map(col => '<div class="color-swatch' + (col===config.color?' selected':'') + '" style="background:' + col + '" onclick="selectColor(\'' + col + '\',this);renderSettings()"></div>').join('');
+
+  const emojiList = ['🏚️','🍽️','🚐','🌿','🔥','⭐','🥘','🍖','🍛','🥗','🍜','🫕']
+    .map(em => '<span style="font-size:1.8rem;cursor:pointer;border:2px solid ' + (config.emoji===em?'#D4A843':'transparent') + ';border-radius:8px;padding:2px" onclick="config.emoji=\'' + em + '\';applyConfig();renderSettings()">' + em + '</span>').join('');
+
+  const planBtn = !isPro
+    ? '<button onclick="openUpgrade()" style="background:#D4A843;border:none;color:#0C0C0A;padding:8px 14px;border-radius:8px;font-size:0.8rem;font-weight:700;font-family:Syne,sans-serif;cursor:pointer">⭐ Passer Pro</button>'
+    : '<span style="color:#3DAA6A;font-size:0.85rem">✓ Actif</span>';
+
+  c.innerHTML =
+    '<div class="settings-section">' +
+      '<div class="settings-title">' + (isFr?'Informations':'Information') + '</div>' +
+      '<div class="s-field"><label>' + (isFr?'Nom du restaurant':'Restaurant name') + '</label>' +
+        '<input type="text" value="' + config.name + '" id="s-name" placeholder="Ex: Chez Mama Céleste"></div>' +
+      '<div class="s-field"><label>' + (isFr?'Slogan':'Slogan') + '</label>' +
+        '<input type="text" value="' + (config.desc||'') + '" id="s-desc" placeholder="Ex: La meilleure cuisine de Brazzaville"></div>' +
+      '<div class="s-field"><label>' + (isFr?'Ville':'City') + '</label>' +
+        '<select id="s-city">' + cityOptions + '</select></div>' +
+      '<div class="s-field"><label>' + (isFr?'Type':'Type') + '</label>' +
+        '<select id="s-type">' +
+          '<option value="maquis"' + (config.type==='maquis'?' selected':'') + '>🏚️ Maquis / Gargote</option>' +
+          '<option value="resto"' + (config.type==='resto'?' selected':'') + '>🍽️ Restaurant</option>' +
+          '<option value="truck"' + (config.type==='truck'?' selected':'') + '>🚐 Food Truck</option>' +
+          '<option value="delivery"' + (config.type==='delivery'?' selected':'') + '>📦 Livraison</option>' +
+        '</select></div>' +
+    '</div>' +
+
+    '<div class="settings-section">' +
+      '<div class="settings-title">' + (isFr?'Apparence':'Appearance') + '</div>' +
+      '<div class="s-field"><label>' + (isFr?'Emoji / Icône':'Emoji / Icon') + '</label>' +
+        '<div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:6px">' + emojiList + '</div></div>' +
+      '<div class="s-field"><label>' + (isFr?'Couleur principale':'Primary color') + ' ' + (!isPro ? '<span style="font-size:0.7rem;background:rgba(212,168,67,0.15);color:#D4A843;padding:2px 8px;border-radius:10px;font-weight:700">PRO 🔒</span>' : '') + '</label>' +
+        '<div class="color-row" style="' + (!isPro?'opacity:0.4;pointer-events:none':'') + '" onclick="' + (!isPro?'openUpgrade()':'') + '">' + colorSwatches + '</div>' +
+        (!isPro ? '<div style="font-size:0.78rem;color:#6B6560;margin-top:4px">👆 ' + (isFr?'Personnalisez vos couleurs avec le plan Pro':'Customize colors with Pro plan') + '</div>' : '') +
+    '</div>' +
+
+    '<div class="settings-section">' +
+      '<div class="settings-title">🍽️ ' + (isFr?'Mon Menu':'My Menu') + ' <span style="color:#6B6560;font-size:0.75rem;font-weight:400">(' + menu.length + ' ' + (isFr?'plats':'dishes') + ')</span></div>' +
+      '<div style="background:#1C1A17;border:1px solid #272420;border-radius:12px;padding:16px;margin-bottom:14px">' +
+        '<div style="font-family:Syne,sans-serif;font-size:0.8rem;font-weight:700;color:#D4A843;margin-bottom:12px;letter-spacing:1px">' + (isFr?'AJOUTER UN PLAT':'ADD A DISH') + '</div>' +
+        '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">' +
+          '<div class="s-field"><label>' + (isFr?'Nom FR *':'Name FR *') + '</label><input type="text" id="dish-nameFr" placeholder="Ex: Poulet Moambe"></div>' +
+          '<div class="s-field"><label>' + (isFr?'Nom EN':'Name EN') + '</label><input type="text" id="dish-nameEn" placeholder="Ex: Moambe Chicken"></div>' +
+        '</div>' +
+        '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">' +
+          '<div class="s-field"><label>' + (isFr?'Prix FCFA *':'Price FCFA *') + '</label><input type="number" id="dish-price" placeholder="5000"></div>' +
+          '<div class="s-field"><label>Emoji</label><input type="text" id="dish-emoji" placeholder="🍗" maxlength="2" style="font-size:1.2rem"></div>' +
+          '<div class="s-field"><label>' + (isFr?'Catégorie':'Category') + '</label><input type="text" id="dish-category" placeholder="' + (isFr?'Plats':'Dishes') + '"></div>' +
+        '</div>' +
+        '<div class="s-field"><label>' + (isFr?'Description':'Description') + '</label><input type="text" id="dish-desc" placeholder="' + (isFr?'Ingrédients...':'Ingredients...') + '"></div>' +
+        '<button onclick="addMenuItem()" style="width:100%;background:#D4A843;border:none;color:#0C0C0A;padding:12px;border-radius:8px;font-size:0.9rem;font-weight:700;font-family:Syne,sans-serif;cursor:pointer;margin-top:4px">+ ' + (isFr?'Ajouter ce plat':'Add this dish') + '</button>' +
+      '</div>' +
+      menuListHtml +
+    '</div>' +
+
+    '<div class="settings-section">' +
+      '<div class="settings-title">' + (isFr?'Plan actuel':'Current plan') + '</div>' +
+      '<div style="background:#1C1A17;border:1px solid #272420;border-radius:10px;padding:14px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center">' +
+        '<div>' +
+          '<div style="font-family:Syne,sans-serif;font-weight:700;font-size:0.95rem">' + (isPro?'Pro ⭐':'Gratuit') + '</div>' +
+          '<div style="font-size:0.78rem;color:#6B6560">' + (isPro?'15 000 FCFA/mois':'0 FCFA/mois') + '</div>' +
+        '</div>' +
+        planBtn +
+      '</div>' +
+    '</div>' +
+    '<button class="save-btn" onclick="saveSettings()">' + (isFr?'Enregistrer les modifications':'Save changes') + '</button>';
+}
+
+function addMenuItem() {
+  const nameFr = document.getElementById('dish-nameFr') ? document.getElementById('dish-nameFr').value.trim() : '';
+  const nameEn = document.getElementById('dish-nameEn') ? document.getElementById('dish-nameEn').value.trim() : '';
+  const price = document.getElementById('dish-price') ? document.getElementById('dish-price').value : '';
+  const emoji = document.getElementById('dish-emoji') ? (document.getElementById('dish-emoji').value.trim() || '🍽️') : '🍽️';
+  const category = document.getElementById('dish-category') ? (document.getElementById('dish-category').value.trim() || (lang==='fr'?'Menu':'Menu')) : 'Menu';
+  const description = document.getElementById('dish-desc') ? document.getElementById('dish-desc').value.trim() : '';
+
+  if (!nameFr || !price) {
+    showToast(lang==='fr' ? '⚠ Nom FR et prix requis' : '⚠ FR name and price required');
+    return;
+  }
+
+  if (!config.restaurantMenu) config.restaurantMenu = [];
+  config.restaurantMenu.push({
+    id: 'dish_' + Date.now(),
+    nameFr: nameFr,
+    nameEn: nameEn || nameFr,
+    price: Number(price),
+    emoji: emoji,
+    category: category,
+    description: description
+  });
+
+  showToast(lang==='fr' ? '✓ Plat ajouté !' : '✓ Dish added!');
+  renderSettings();
+  renderMenu();
+}
+
+function deleteMenuItem(index) {
+  if (!config.restaurantMenu) return;
+  config.restaurantMenu.splice(index, 1);
+  showToast(lang==='fr' ? '✓ Plat supprimé' : '✓ Dish removed');
+  renderSettings();
+  renderMenu();
+}
+
+function saveSettings() {
+  const nameEl = document.getElementById('s-name');
+  const descEl = document.getElementById('s-desc');
+  const cityEl = document.getElementById('s-city');
+  const typeEl = document.getElementById('s-type');
+  if (nameEl) config.name = nameEl.value || config.name;
+  if (descEl) config.desc = descEl.value || config.desc;
+  if (cityEl) config.city = cityEl.value || config.city;
+  if (typeEl) config.type = typeEl.value || config.type;
+  applyConfig();
+  showToast(lang==='fr'?'✓ Sauvegardé !':'✓ Saved!');
+}
+
+// ===== UPGRADE =====
+function openUpgrade() { document.getElementById('umodal').classList.add('open'); }
+function closeUpgrade() { document.getElementById('umodal').classList.remove('open'); }
+
+function activatePro() {
+  config.plan = 'pro';
+  closeUpgrade();
+  applyConfig();
+  renderMenu();
+  renderManager();
+  renderSettings();
+  showToast('🎉 Plan Pro activé !');
+  // unlock EN
+  document.getElementById('btn-en').style.opacity = '1';
+  document.getElementById('btn-en').title = '';
+}
+
+// ===== TOAST =====
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 2500);
+}
+
+document.getElementById('umodal').addEventListener('click', function(e){ if(e.target===this) closeUpgrade(); });
+</script>
+
+</body>
+</html>
