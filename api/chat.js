@@ -13,8 +13,9 @@ const body = typeof req.body === ‘string’ ? JSON.parse(req.body) : req.body;
 const { messages, system, action, data } = body;
 
 ```
-const SUPABASE_URL = process.env.SUPABASE_URL;
-const SUPABASE_KEY = process.env.SUPABASE_ANON_KEY;
+const SUPABASE_URL = process.env.SUPABASE_URL || '';
+const SUPABASE_KEY = process.env.SUPABASE_ANON_KEY || '';
+
 
 if (action === 'save_restaurant') {
   const r = await fetch(SUPABASE_URL + '/rest/v1/restaurants', {
