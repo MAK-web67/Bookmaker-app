@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="dark">
+<link rel="manifest" href="/manifest.json">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Bookmaker">
+<title>Commander</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html,body{background:#0C0C0A!important;color:#EDE8DF!important;font-family:'DM Sans',sans-serif;min-height:100vh;-webkit-text-size-adjust:100%}
+:root{--gold:#D4A843;--bg:#0C0C0A;--card:#1C1A17;--border:#272420;--text:#EDE8DF;--muted:#6B6560;--green:#3DAA6A;--red:#C94040}
+
+#loading{position:fixed;inset:0;background:#0C0C0A;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;z-index:999}
+.loader{width:38px;height:38px;border-radius:50%;border:3px solid #272420;border-top-color:var(–gold);animation:spin 0.8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+#error-screen{display:none;position:fixed;inset:0;background:#0C0C0A;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:32px}
+
+#app{display:none;flex-direction:column;min-height:100vh}
+
+.topbar{background:#141412;border-bottom:1px solid #272420;padding:11px 14px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+.resto-info{display:flex;align-items:center;gap:10px}
+.r-av{width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:1rem}
+.r-name{font-family:‘Syne’,sans-serif;font-size:0.92rem;font-weight:700}
+.r-city{font-size:0.7rem;color:#6B6560}
+.powered{font-size:0.68rem;color:#6B6560}
+
+.tabs{display:flex;background:#141412;border-bottom:1px solid #272420}
+.tab{flex:1;padding:12px 6px;font-size:0.78rem;color:#6B6560;cursor:pointer;text-align:center;border-bottom:2px solid transparent;transition:all 0.2s;display:flex;align-items:center;justify-content:center;gap:4px}
+.tab.active{color:var(–gold);border-bottom-color:var(–gold)}
+
+.panel{display:none;flex:1;flex-direction:column}
+.panel.active{display:flex}
+
+/* CHAT */
+.chat-wrap{display:flex;flex-direction:column;height:calc(100vh - 155px)}
+.messages{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:12px;scrollbar-width:thin}
+.msg{display:flex;gap:9px}
+.msg.user{flex-direction:row-reverse}
+.av{width:32px;height:32px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:0.85rem}
+.av.ai{font-weight:800;color:#0C0C0A}
+.av.user{background:#1C1A17;border:1px solid #272420}
+.bub{max-width:74%;padding:10px 13px;border-radius:13px;font-size:0.87rem;line-height:1.6}
+.bub.ai{background:#1C1A17;border:1px solid #272420;border-radius:4px 13px 13px 13px}
+.bub.user{color:#0C0C0A;border-radius:13px 4px 13px 13px;font-weight:500}
+.typing-dots{display:flex;gap:4px;padding:2px 0;align-items:center}
+.typing-dots span{width:6px;height:6px;border-radius:50%;background:var(–gold);animation:bounce 1.2s infinite}
+.typing-dots span:nth-child(2){animation-delay:.2s}
+.typing-dots span:nth-child(3){animation-delay:.4s}
+@keyframes bounce{0%,60%,100%{transform:translateY(0);opacity:.4}30%{transform:translateY(-5px);opacity:1}}
+.quick-row{padding:7px 12px;display:flex;gap:7px;overflow-x:auto;scrollbar-width:none;border-top:1px solid #272420}
+.q-btn{background:#1C1A17;border:1px solid #272420;color:#EDE8DF;padding:6px 11px;border-radius:18px;font-size:0.77rem;cursor:pointer;white-space:nowrap;font-family:‘DM Sans’,sans-serif}
+.input-row{padding:9px 12px;display:flex;gap:8px;background:#141412;border-top:1px solid #272420}
+.input-row input{flex:1;background:#1C1A17;border:1px solid #272420;color:#EDE8DF;padding:10px 13px;border-radius:20px;font-size:0.87rem;font-family:‘DM Sans’,sans-serif;outline:none;transition:border-color 0.2s}
+.input-row input:focus{border-color:var(–gold)}
+.input-row input::placeholder{color:#6B6560}
+.send-btn{background:var(–gold);border:none;color:#0C0C0A;width:40px;height:40px;border-radius:50%;cursor:pointer;font-size:0.95rem;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.send-btn:disabled{background:#272420;cursor:not-allowed}
+
+/* MENU */
+.menu-wrap{padding:14px;overflow-y:auto;flex:1}
+.cat-title{font-family:‘Syne’,sans-serif;font-size:0.88rem;font-weight:700;color:var(–gold);margin:14px 0 8px}
+.menu-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin-bottom:8px}
+.m-card{background:#1C1A17;border:1px solid #272420;border-radius:12px;overflow:hidden;cursor:pointer;transition:all 0.2s}
+.m-card:hover{border-color:var(–gold);transform:translateY(-2px)}
+.m-card-img{width:100%;height:110px;object-fit:cover;display:block}
+.m-card-body{padding:10px}
+.m-emoji{font-size:1.7rem;margin-bottom:6px}
+.m-name{font-size:0.84rem;font-weight:600;margin-bottom:2px}
+.m-price{font-size:0.8rem;color:var(–gold);font-weight:700}
+.m-desc{font-size:0.7rem;color:#6B6560;margin-top:3px}
+.m-add{width:100%;background:var(–gold);border:none;color:#0C0C0A;padding:8px;font-size:0.78rem;font-weight:700;font-family:‘Syne’,sans-serif;cursor:pointer;transition:all 0.2s}
+.m-add:hover{background:#F0C96A}
+
+/* ORDER */
+.order-wrap{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:9px}
+.o-item{background:#1C1A17;border:1px solid #272420;border-radius:11px;padding:13px;display:flex;align-items:center;gap:11px}
+.o-info{flex:1}
+.o-name{font-size:0.87rem;font-weight:600}
+.o-price{font-size:0.8rem;color:var(–gold);margin-top:2px}
+.qty-ctrl{display:flex;align-items:center;gap:7px}
+.qty-btn{background:#141412;border:1px solid #272420;color:#EDE8DF;width:25px;height:25px;border-radius:50%;cursor:pointer;font-size:0.95rem;display:flex;align-items:center;justify-content:center;font-family:‘DM Sans’,sans-serif}
+.qty{font-size:0.87rem;min-width:18px;text-align:center}
+.order-footer{background:#141412;border-top:1px solid #272420;padding:14px}
+.total-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:11px}
+.total-lbl{font-size:0.87rem;color:#6B6560}
+.total-val{font-family:‘Syne’,sans-serif;font-size:1.25rem;color:var(–gold);font-weight:800}
+.confirm-btn{width:100%;background:var(–red);border:none;color:white;padding:13px;border-radius:9px;font-size:0.9rem;font-weight:700;font-family:‘Syne’,sans-serif;cursor:pointer}
+.empty-state{text-align:center;padding:44px 20px;color:#6B6560}
+.empty-state .big{font-size:2.8rem;margin-bottom:11px}
+
+.cart-badge{background:var(–red);color:white;width:16px;height:16px;border-radius:50%;font-size:0.65rem;display:inline-flex;align-items:center;justify-content:center;font-weight:700}
+
+.toast{position:fixed;bottom:75px;left:50%;transform:translateX(-50%) translateY(20px);background:#3DAA6A;color:white;padding:8px 17px;border-radius:20px;font-size:0.8rem;font-weight:500;opacity:0;transition:all 0.3s;z-index:999;pointer-events:none}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+.footer-cta{background:#111110;border-top:1px solid #272420;padding:11px 14px;text-align:center}
+.footer-cta a{font-size:0.73rem;color:#6B6560;text-decoration:none;display:inline-flex;align-items:center;gap:5px}
+
+/* Panier flottant depuis le chat */
+.cart-notif{background:rgba(212,168,67,0.15);border:1px solid rgba(212,168,67,0.3);border-radius:10px;padding:10px 12px;margin:8px 14px;font-size:0.82rem;display:none;align-items:center;justify-content:space-between}
+.cart-notif.show{display:flex}
+.cart-notif-btn{background:var(–gold);border:none;color:#0C0C0A;padding:5px 12px;border-radius:7px;font-size:0.78rem;font-weight:700;font-family:‘Syne’,sans-serif;cursor:pointer}
+</style>
+
+</head>
+<body>
+
+<div id="loading">
+  <div class="loader"></div>
+  <div style="font-size:0.83rem;color:#6B6560">Chargement...</div>
+</div>
+
+<div id="error-screen">
+  <div style="font-size:3rem;margin-bottom:14px">😕</div>
+  <div style="font-family:'Syne',sans-serif;font-size:1.05rem;font-weight:800;margin-bottom:8px">Lien invalide</div>
+  <div style="font-size:0.84rem;color:#6B6560;margin-bottom:22px">Ce lien ne correspond a aucun restaurant Bookmaker.</div>
+  <a href="bookmaker-app.html" style="background:#D4A843;color:#0C0C0A;padding:12px 22px;border-radius:9px;text-decoration:none;font-weight:700;font-family:'Syne',sans-serif;font-size:0.88rem">Creer mon Bookmaker</a>
+</div>
+
+<div id="app">
+  <div class="topbar">
+    <div class="resto-info">
+      <div class="r-av" id="c-avatar">🍽️</div>
+      <div>
+        <div class="r-name" id="c-name">Restaurant</div>
+        <div class="r-city" id="c-city">Brazzaville</div>
+      </div>
+    </div>
+    <div class="powered">⚡ Bookmaker</div>
+  </div>
+
+  <div class="tabs">
+    <div class="tab active" onclick="switchTab('chat')" id="ctab-chat">🤖 Serveur IA</div>
+    <div class="tab" onclick="switchTab('menu')" id="ctab-menu">🍽️ Menu</div>
+    <div class="tab" onclick="switchTab('order')" id="ctab-order">🛒 Panier <span id="cart-badge" class="cart-badge" style="display:none">0</span></div>
+  </div>
+
+  <div style="flex:1;display:flex;flex-direction:column;overflow:hidden">
+
+```
+<div class="panel active" id="panel-chat">
+  <div class="chat-wrap">
+    <div class="messages" id="messages"></div>
+    <div class="cart-notif" id="cart-notif">
+      <span id="cart-notif-text">1 plat ajoute au panier</span>
+      <button class="cart-notif-btn" onclick="switchTab('order')">Voir le panier</button>
+    </div>
+    <div class="quick-row" id="quick-row"></div>
+    <div class="input-row">
+      <input type="text" id="chat-input" placeholder="Demandez-moi quelque chose..." onkeydown="if(event.key==='Enter')sendMsg()">
+      <button class="send-btn" id="send-btn" onclick="sendMsg()">➤</button>
+    </div>
+  </div>
+</div>
+
+<div class="panel" id="panel-menu">
+  <div class="menu-wrap" id="menu-wrap"></div>
+</div>
+
+<div class="panel" id="panel-order">
+  <div class="order-wrap" id="order-wrap"></div>
+  <div class="order-footer" id="order-footer" style="display:none">
+    <div class="total-row">
+      <span class="total-lbl">Total</span>
+      <span class="total-val" id="total-val">0 FCFA</span>
+    </div>
+    <button class="confirm-btn" onclick="confirmOrder()">Confirmer la commande</button>
+  </div>
+</div>
+```
+
+  </div>
+
+  <div class="footer-cta">
+    <a href="bookmaker-app.html">⚡ <span>Vous avez un restaurant ? <strong style="color:#D4A843">Creer mon Bookmaker gratuit</strong></span></a>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+var resto = {};
+var cart = [];
+var isTyping = false;
+
+// ===== INIT =====
+window.onload = function() {
+  var params = new URLSearchParams(window.location.search);
+  var data = params.get('data');
+
+  if(!data) { showError(); return; }
+
+  try {
+    // Safe decode for Unicode/French characters
+    var decoded = atob(data).split('').map(function(c) {
+      return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+    }).join('');
+    resto = JSON.parse(decodeURIComponent(decoded));
+    if(resto.color) document.documentElement.style.setProperty('--gold', resto.color);
+
+    var av = document.getElementById('c-avatar');
+    av.textContent = resto.emoji || '🍽️';
+    av.style.background = (resto.color||'#D4A843') + '22';
+    av.style.color = resto.color || '#D4A843';
+    document.getElementById('c-name').textContent = resto.name || 'Restaurant';
+    document.getElementById('c-city').textContent = resto.city || 'Brazzaville';
+    document.title = (resto.name||'Restaurant') + ' — Commander';
+
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('app').style.display = 'flex';
+
+    initChat();
+    renderMenu();
+  } catch(e) {
+    showError();
+  }
+};
+
+function showError() {
+  document.getElementById('loading').style.display = 'none';
+  document.getElementById('error-screen').style.display = 'flex';
+}
+
+// ===== TABS =====
+function switchTab(id) {
+  document.querySelectorAll('.panel').forEach(function(p){p.classList.remove('active')});
+  document.querySelectorAll('.tab').forEach(function(t){t.classList.remove('active')});
+  document.getElementById('panel-'+id).classList.add('active');
+  var map = {chat:'ctab-chat',menu:'ctab-menu',order:'ctab-order'};
+  if(map[id]) document.getElementById(map[id]).classList.add('active');
+  if(id==='order') renderOrder();
+  if(id==='menu') renderMenu();
+}
+
+// ===== CHAT =====
+function initChat() {
+  addMsg('ai', 'Bienvenue chez ' + (resto.name||'nous') + ' ! Je suis votre serveur. Dites-moi ce qui vous ferait plaisir — je connais chaque plat du menu et je peux vous aider a commander.');
+  renderQuick();
+}
+
+function renderQuick() {
+  var qs = ['Qu est-ce que vous recommandez ?', 'Voir le menu', 'Plat du jour ?', 'Je suis vegetarien'];
+  document.getElementById('quick-row').innerHTML = qs.map(function(q) {
+    return '<button class="q-btn" onclick="sendQuick(this.textContent)">' + q + '</button>';
+  }).join('');
+}
+
+function addMsg(role, text) {
+  var msgs = document.getElementById('messages');
+  var div = document.createElement('div');
+  div.className = 'msg ' + role;
+  var color = resto.color || '#D4A843';
+  var av = role==='ai'
+    ? '<div class="av ai" style="background:' + color + '22;color:' + color + '">' + (resto.emoji||'🍽️') + '</div>'
+    : '<div class="av user">👤</div>';
+  var bub = role==='ai'
+    ? '<div class="bub ai">' + text.replace(/\n/g,'<br>') + '</div>'
+    : '<div class="bub user" style="background:' + color + '">' + text + '</div>';
+  div.innerHTML = role==='ai' ? av+bub : bub+av;
+  msgs.appendChild(div);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+function showTyping() {
+  var msgs = document.getElementById('messages');
+  var d = document.createElement('div');
+  d.className='msg ai'; d.id='typing';
+  var color = resto.color||'#D4A843';
+  d.innerHTML = '<div class="av ai" style="background:' + color + '22;color:' + color + '">' + (resto.emoji||'🍽️') + '</div><div class="bub ai"><div class="typing-dots"><span></span><span></span><span></span></div></div>';
+  msgs.appendChild(d); msgs.scrollTop=msgs.scrollHeight;
+}
+
+function removeTyping() { var el=document.getElementById('typing'); if(el) el.remove(); }
+
+async function sendMsg() {
+  var inp = document.getElementById('chat-input');
+  var text = inp.value.trim();
+  if(!text||isTyping) return;
+  inp.value = '';
+  addMsg('user', text);
+  await getReply(text);
+}
+
+function sendQuick(t) { document.getElementById('chat-input').value=t; sendMsg(); }
+
+async function getReply(userMsg) {
+  isTyping = true;
+  document.getElementById('send-btn').disabled = true;
+  showTyping();
+
+  var menu = resto.menu || [];
+  var menuCtx = menu.length > 0
+    ? menu.map(function(i){ return '- ' + i.nameFr + ' (' + (i.category||'Menu') + '): ' + Number(i.price).toLocaleString() + ' FCFA' + (i.desc?' — '+i.desc:''); }).join('\n')
+    : 'Menu en cours de configuration.';
+
+  var menuIds = JSON.stringify(menu.map(function(i){ return {id:i.id, name:i.nameFr}; }));
+
+  var sys = 'Tu es le serveur IA de "' + (resto.name||'ce restaurant') + '" a ' + (resto.city||'Brazzaville') + '.\n\n' +
+    'Personnalite : classe et charisme. Chaleureux sans en faire trop. Professionnel comme un excellent serveur. Une phrase suffit quand c est suffisant.\n\n' +
+    'IMPORTANT : si le client veut commander un plat, reponds normalement ET ajoute a la fin de ta reponse exactement cette balise : [ADD_TO_CART:ID_DU_PLAT] en remplacant ID_DU_PLAT par le vrai id du plat dans cette liste : ' + menuIds + '\n\n' +
+    'Exemple : si le client dit "je veux le poulet" et que l id du poulet est "d123", reponds : "Excellent choix ! Le Poulet Moambe est notre specialite. [ADD_TO_CART:d123]"\n\n' +
+    'Si le client veut plusieurs plats, ajoute plusieurs balises.\n\n' +
+    'Menu complet :\n' + menuCtx;
+
+  try {
+    var res = await fetch('/api/chat', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({system: sys, messages: [{role:'user', content: userMsg}]})
+    });
+    var data = await res.json();
+    removeTyping();
+
+    var reply = data.content && data.content[0] ? data.content[0].text : 'Desole, une erreur est survenue.';
+
+    // Parse ADD_TO_CART tags
+    var addedItems = [];
+    var cleanReply = reply.replace(/\[ADD_TO_CART:([^\]]+)\]/g, function(match, id) {
+      var item = (resto.menu||[]).find(function(i){ return i.id === id; });
+      if(item) {
+        addToCart(id, true);
+        addedItems.push(item.nameFr);
+      }
+      return '';
+    }).trim();
+
+    addMsg('ai', cleanReply);
+
+    if(addedItems.length > 0) {
+      showCartNotif(addedItems);
+    }
+
+  } catch(e) {
+    removeTyping();
+    addMsg('ai', 'Connexion impossible. Reessayez.');
+  }
+  isTyping = false;
+  document.getElementById('send-btn').disabled = false;
+}
+
+function showCartNotif(items) {
+  var notif = document.getElementById('cart-notif');
+  var text = document.getElementById('cart-notif-text');
+  text.textContent = items.join(', ') + ' ajoute' + (items.length > 1 ? 's' : '') + ' au panier';
+  notif.classList.add('show');
+  setTimeout(function(){ notif.classList.remove('show'); }, 4000);
+}
+
+// ===== MENU =====
+function renderMenu() {
+  var c = document.getElementById('menu-wrap');
+  var menu = resto.menu || [];
+
+  if(!menu.length) {
+    c.innerHTML = '<div class="empty-state"><div class="big">🍽️</div><p>Menu en cours de preparation</p></div>';
+    return;
+  }
+
+  var cats = {};
+  menu.forEach(function(item) {
+    var cat = item.category || 'Menu';
+    if(!cats[cat]) cats[cat] = [];
+    cats[cat].push(item);
+  });
+
+  var html = '';
+  Object.keys(cats).forEach(function(cat) {
+    html += '<div class="cat-title">🍽️ ' + cat + '</div><div class="menu-grid">';
+    cats[cat].forEach(function(item) {
+      var topHtml = item.photo
+        ? '<img class="m-card-img" src="' + item.photo + '" alt="' + item.nameFr + '">'
+        : '<div class="m-card-body"><div class="m-emoji">' + (item.emoji||'🍽️') + '</div></div>';
+      var bodyClass = item.photo ? 'm-card-body' : '';
+      html += '<div class="m-card">' +
+        topHtml +
+        '<div class="m-card-body">' +
+        '<div class="m-name">' + item.nameFr + '</div>' +
+        '<div class="m-price">' + Number(item.price).toLocaleString() + ' FCFA</div>' +
+        (item.desc ? '<div class="m-desc">' + item.desc + '</div>' : '') +
+        '</div>' +
+        '<button class="m-add" onclick="addToCart(\'' + item.id + '\', false)">+ Ajouter</button>' +
+        '</div>';
+    });
+    html += '</div>';
+  });
+  c.innerHTML = html;
+}
+
+// ===== CART =====
+function addToCart(id, fromAI) {
+  var item = (resto.menu||[]).find(function(i){ return i.id === id; });
+  if(!item) return;
+  var ex = cart.find(function(c){ return c.id === id; });
+  if(ex) ex.qty++;
+  else cart.push(Object.assign({}, item, {qty:1}));
+  updateBadge();
+  if(!fromAI) showToast('✓ Ajoute !');
+}
+
+function updateBadge() {
+  var total = cart.reduce(function(s,i){ return s+i.qty; }, 0);
+  var b = document.getElementById('cart-badge');
+  b.textContent = total;
+  b.style.display = total > 0 ? 'inline-flex' : 'none';
+}
+
+function renderOrder() {
+  var c = document.getElementById('order-wrap');
+  var footer = document.getElementById('order-footer');
+  if(!cart.length) {
+    c.innerHTML = '<div class="empty-state"><div class="big">🛒</div><p>Panier vide</p><p style="margin-top:6px;font-size:0.78rem">Ajoutez des plats depuis le menu ou demandez au serveur</p></div>';
+    footer.style.display = 'none';
+    return;
+  }
+  footer.style.display = 'block';
+  c.innerHTML = cart.map(function(item) {
+    var imgHtml = item.photo
+      ? '<img src="' + item.photo + '" style="width:44px;height:44px;object-fit:cover;border-radius:7px;flex-shrink:0">'
+      : '<div style="font-size:1.4rem;flex-shrink:0">' + (item.emoji||'🍽️') + '</div>';
+    return '<div class="o-item">' + imgHtml +
+      '<div class="o-info"><div class="o-name">' + item.nameFr + '</div><div class="o-price">' + (Number(item.price)*item.qty).toLocaleString() + ' FCFA</div></div>' +
+      '<div class="qty-ctrl"><button class="qty-btn" onclick="changeQty(\'' + item.id + '\',-1)">−</button><span class="qty">' + item.qty + '</span><button class="qty-btn" onclick="changeQty(\'' + item.id + '\',1)">+</button></div></div>';
+  }).join('');
+  var total = cart.reduce(function(s,i){ return s+Number(i.price)*i.qty; }, 0);
+  document.getElementById('total-val').textContent = total.toLocaleString() + ' FCFA';
+}
+
+function changeQty(id, d) {
+  var i = cart.findIndex(function(c){ return c.id === id; });
+  if(i===-1) return;
+  cart[i].qty += d;
+  if(cart[i].qty <= 0) cart.splice(i, 1);
+  updateBadge(); renderOrder();
+}
+
+function confirmOrder() {
+  var count = cart.reduce(function(s,i){ return s+i.qty; }, 0);
+  var total = cart.reduce(function(s,i){ return s+Number(i.price)*i.qty; }, 0);
+  cart = []; updateBadge(); renderOrder();
+  addMsg('ai', 'Commande confirmee ! ' + count + ' article(s) pour ' + total.toLocaleString() + ' FCFA.\nTemps estime : 20-30 min. Merci et bon appetit !');
+  switchTab('chat');
+  showToast('Commande confirmee !');
+}
+
+function showToast(msg) {
+  var t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(function(){ t.classList.remove('show'); }, 2500);
+}
+</script>
+
+<script>
+if('serviceWorker' in navigator) {
+  window.addEventListener('load', function() {
+    navigator.serviceWorker.register('/sw.js').then(function(reg) {
+      console.log('SW registered:', reg.scope);
+    }).catch(function(err) {
+      console.log('SW error:', err);
+    });
+  });
+}
+</script>
+
+</body>
+</html>
