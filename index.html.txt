@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#0C0C0A">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Bookmaker">
+<link rel="manifest" href="/manifest.json">
+<title>Bookmaker — L'IA pour la restauration au Congo</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html,body{background:#0C0C0A!important;color:#EDE8DF!important;font-family:'DM Sans',sans-serif;min-height:100vh;-webkit-text-size-adjust:100%}
+
+body{
+display:flex;flex-direction:column;align-items:center;justify-content:center;
+padding:24px;min-height:100vh;
+background:radial-gradient(ellipse at 50% 0%, rgba(212,168,67,0.1) 0%, transparent 60%), #0C0C0A;
+}
+
+.logo{
+font-family:‘Syne’,sans-serif;font-size:2.2rem;font-weight:800;
+color:#EDE8DF;margin-bottom:4px;letter-spacing:-1px;
+}
+.logo span{color:#D4A843}
+
+.tagline{
+font-size:0.88rem;color:#6B6560;margin-bottom:48px;text-align:center;
+}
+
+.card{
+background:#1C1A17;border:1px solid #272420;border-radius:20px;
+padding:28px 24px;max-width:380px;width:100%;
+}
+
+.welcome-icon{font-size:3rem;margin-bottom:16px;text-align:center}
+
+.welcome-title{
+font-family:‘Syne’,sans-serif;font-size:1.3rem;font-weight:800;
+text-align:center;margin-bottom:8px;
+}
+
+.welcome-sub{
+font-size:0.85rem;color:#9B9590;text-align:center;
+line-height:1.6;margin-bottom:28px;
+}
+
+.btn-primary{
+display:block;width:100%;padding:14px;border-radius:10px;
+background:#D4A843;border:none;color:#0C0C0A;
+font-size:0.95rem;font-weight:700;font-family:‘Syne’,sans-serif;
+cursor:pointer;text-align:center;text-decoration:none;
+transition:all 0.2s;margin-bottom:12px;
+}
+.btn-primary:hover{background:#F0C96A}
+
+.btn-secondary{
+display:block;width:100%;padding:14px;border-radius:10px;
+background:transparent;border:1px solid #272420;color:#EDE8DF;
+font-size:0.92rem;font-weight:500;font-family:‘DM Sans’,sans-serif;
+cursor:pointer;text-align:center;text-decoration:none;
+transition:all 0.2s;margin-bottom:20px;
+}
+.btn-secondary:hover{border-color:#D4A843;color:#D4A843}
+
+.divider{
+display:flex;align-items:center;gap:12px;margin-bottom:20px;
+}
+.divider-line{flex:1;height:1px;background:#272420}
+.divider-text{font-size:0.75rem;color:#6B6560}
+
+.features{display:flex;flex-direction:column;gap:10px;margin-top:4px}
+.feature{display:flex;align-items:center;gap:10px;font-size:0.83rem;color:#9B9590}
+.feature span{font-size:1rem}
+
+.footer-text{
+font-size:0.72rem;color:#6B6560;text-align:center;
+margin-top:24px;
+}
+
+.badge{
+display:inline-block;background:rgba(212,168,67,0.1);
+border:1px solid rgba(212,168,67,0.2);color:#D4A843;
+padding:5px 14px;border-radius:20px;font-size:0.78rem;
+font-weight:600;margin-bottom:32px;
+}
+</style>
+
+</head>
+<body>
+
+<div class="logo">Book<span>maker</span></div>
+<div class="tagline">L'IA pour la restauration au Congo 🇨🇬</div>
+
+<div class="card">
+  <div class="welcome-icon">🍽️</div>
+  <div class="welcome-title">Bienvenue sur Bookmaker</div>
+  <div class="welcome-sub">Gerez votre restaurant avec l'intelligence artificielle. Menu, commandes, stock et analyses en temps reel.</div>
+
+<a href="bookmaker-app.html" class="btn-primary">Creer mon Bookmaker gratuit</a>
+
+  <div class="divider">
+    <div class="divider-line"></div>
+    <div class="divider-text">Deja inscrit ?</div>
+    <div class="divider-line"></div>
+  </div>
+
+<a href="bookmaker-app.html" class="btn-secondary">Acceder a mon espace gerant</a>
+
+  <div class="features">
+    <div class="feature"><span>🤖</span>Assistant IA personnalise</div>
+    <div class="feature"><span>🍽️</span>Menu digital avec photos</div>
+    <div class="feature"><span>📊</span>Tableau de bord en temps reel</div>
+    <div class="feature"><span>🔗</span>Lien client partageble</div>
+    <div class="feature"><span>📱</span>Installable sur telephone</div>
+  </div>
+</div>
+
+<div class="footer-text">⚡ Propulse par Bookmaker · Congo-Brazzaville</div>
+
+<script>
+// Check if user already has a config saved
+window.onload = function() {
+  try {
+    var saved = sessionStorage.getItem('bm_cfg');
+    if(saved) {
+      var cfg = JSON.parse(saved);
+      if(cfg && cfg.name) {
+        // Already configured - update second button
+        var btn = document.querySelector('.btn-secondary');
+        if(btn) {
+          btn.textContent = 'Acceder a ' + cfg.name;
+          btn.style.borderColor = cfg.color || '#D4A843';
+          btn.style.color = cfg.color || '#D4A843';
+        }
+      }
+    }
+  } catch(e) {}
+};
+
+// Service Worker
+if('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/sw.js').catch(function(e){});
+}
+</script>
+
+</body>
+</html>
